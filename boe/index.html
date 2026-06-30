@@ -1,0 +1,2773 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>京东方A (000725.SZ) K线图</title>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: #f5f6fa;
+    color: #2c3e50;
+    padding: 24px;
+  }
+  .container { max-width: 1200px; margin: 0 auto; }
+  
+  .header {
+    background: linear-gradient(135deg, #1565c0 0%, #1976d2 100%);
+    color: white;
+    border-radius: 12px;
+    padding: 28px 32px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 20px rgba(21,101,192,0.2);
+  }
+  .header h1 { font-size: 22px; font-weight: 600; margin-bottom: 4px; }
+  .header .subtitle { font-size: 13px; opacity: 0.8; }
+  .header .code { font-size: 14px; opacity: 0.7; margin-left: 8px; }
+  
+  .metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 20px; }
+  .metric-card {
+    background: white;
+    border-radius: 10px;
+    padding: 18px 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+  .metric-card .label { font-size: 12px; color: #90a4ae; margin-bottom: 4px; }
+  .metric-card .value { font-size: 22px; font-weight: 700; }
+  .metric-card .change { font-size: 13px; margin-top: 2px; }
+  .up { color: #e53935; }
+  .down { color: #43a047; }
+  
+  .chart-wrapper {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    margin-bottom: 20px;
+  }
+  .chart-title { font-size: 15px; font-weight: 600; margin-bottom: 12px; color: #37474f; }
+  #klineChart { width: 100%; height: 500px; }
+  #volumeChart { width: 100%; height: 150px; }
+  
+  .footer {
+    text-align: center;
+    font-size: 12px;
+    color: #90a4ae;
+    padding: 16px 0;
+  }
+  .footer a { color: #5c6bc0; text-decoration: none; }
+  
+  .data-range { font-size: 13px; color: #78909c; margin-bottom: 12px; }
+  
+  .data-table-wrapper { overflow-x: auto; }
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  .data-table th {
+    background: #f5f6fa;
+    padding: 10px 12px;
+    text-align: right;
+    font-weight: 600;
+    color: #546e7a;
+    border-bottom: 2px solid #e0e0e0;
+    white-space: nowrap;
+  }
+  .data-table th:first-child { text-align: left; }
+  .data-table td {
+    padding: 8px 12px;
+    text-align: right;
+    border-bottom: 1px solid #f0f0f0;
+    white-space: nowrap;
+  }
+  .data-table td:first-child { text-align: left; color: #78909c; }
+  .data-table tr:hover { background: #fafafa; }
+</style>
+</head>
+<body>
+<div class="container">
+  
+  <div class="header">
+    <h1>京东方A <span class="code">000725.SZ</span></h1>
+    <div class="subtitle">数据来源：Tushare Pro | 近1年日线数据</div>
+  </div>
+  
+  <div class="metrics">
+    <div class="metric-card">
+      <div class="label">最新收盘</div>
+      <div class="value" style="color:#e53935">7.95</div>
+      <div class="change up">
+        +0.16 (+2.05%)
+      </div>
+    </div>
+    <div class="metric-card">
+      <div class="label">最新交易日</div>
+      <div class="value" style="font-size:16px; color:#546e7a;">2026-06-29</div>
+    </div>
+    <div class="metric-card">
+      <div class="label">近1年最高</div>
+      <div class="value up">8.24</div>
+    </div>
+    <div class="metric-card">
+      <div class="label">近1年最低</div>
+      <div class="value down">3.79</div>
+    </div>
+    <div class="metric-card">
+      <div class="label">近1年涨幅</div>
+      <div class="value" style="color:#e53935">
+        +99.25%
+      </div>
+      <div class="change up">
+        起始价: 3.99
+      </div>
+    </div>
+    <div class="metric-card">
+      <div class="label">日均成交量</div>
+      <div class="value" style="font-size:18px;">955万手</div>
+    </div>
+  </div>
+  
+  <div class="chart-wrapper">
+    <div class="chart-title">日K线图</div>
+    <div class="data-range">数据区间：2025-06-30 ~ 2026-06-29（共242个交易日）</div>
+    <div id="klineChart"></div>
+  </div>
+  
+  <div class="chart-wrapper">
+    <div class="chart-title">成交量</div>
+    <div id="volumeChart"></div>
+  </div>
+  
+  <div class="chart-wrapper">
+    <div class="chart-title" style="cursor:pointer;" onclick="toggleTable()">📊 查看详细数据表 ▼</div>
+    <div id="dataTable" style="display:none;">
+      <div class="data-table-wrapper">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>日期</th>
+              <th>开盘</th>
+              <th>最高</th>
+              <th>最低</th>
+              <th>收盘</th>
+              <th>涨跌幅(%)</th>
+              <th>成交量(万手)</th>
+              <th>成交额(亿元)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>2026-06-29</td>
+              <td style="color:#e53935">7.96</td>
+              <td style="color:#e53935">8.21</td>
+              <td style="color:#e53935">7.51</td>
+              <td style="color:#e53935">7.95</td>
+              <td style="color:#e53935">+2.05%</td>
+              <td>4152.5</td>
+              <td>3248.91</td>
+            </tr>
+            <tr>
+              <td>2026-06-26</td>
+              <td style="color:#e53935">7.50</td>
+              <td style="color:#e53935">8.24</td>
+              <td style="color:#e53935">7.36</td>
+              <td style="color:#e53935">7.79</td>
+              <td style="color:#e53935">+3.59%</td>
+              <td>4525.2</td>
+              <td>3567.67</td>
+            </tr>
+            <tr>
+              <td>2026-06-25</td>
+              <td style="color:#e53935">7.33</td>
+              <td style="color:#e53935">7.67</td>
+              <td style="color:#e53935">7.14</td>
+              <td style="color:#e53935">7.52</td>
+              <td style="color:#e53935">+6.36%</td>
+              <td>3696.4</td>
+              <td>2756.04</td>
+            </tr>
+            <tr>
+              <td>2026-06-24</td>
+              <td style="color:#e53935">6.70</td>
+              <td style="color:#e53935">7.15</td>
+              <td style="color:#e53935">6.57</td>
+              <td style="color:#e53935">7.07</td>
+              <td style="color:#e53935">+4.43%</td>
+              <td>3587.7</td>
+              <td>2499.74</td>
+            </tr>
+            <tr>
+              <td>2026-06-23</td>
+              <td style="color:#43a047">6.85</td>
+              <td style="color:#43a047">7.07</td>
+              <td style="color:#43a047">6.61</td>
+              <td style="color:#43a047">6.77</td>
+              <td style="color:#43a047">-2.31%</td>
+              <td>2914.1</td>
+              <td>1989.47</td>
+            </tr>
+            <tr>
+              <td>2026-06-22</td>
+              <td style="color:#e53935">6.80</td>
+              <td style="color:#e53935">7.18</td>
+              <td style="color:#e53935">6.68</td>
+              <td style="color:#e53935">6.93</td>
+              <td style="color:#e53935">+5.80%</td>
+              <td>3672.9</td>
+              <td>2542.70</td>
+            </tr>
+            <tr>
+              <td>2026-06-18</td>
+              <td style="color:#43a047">6.86</td>
+              <td style="color:#43a047">6.93</td>
+              <td style="color:#43a047">6.49</td>
+              <td style="color:#43a047">6.55</td>
+              <td style="color:#43a047">-1.50%</td>
+              <td>4003.2</td>
+              <td>2665.43</td>
+            </tr>
+            <tr>
+              <td>2026-06-17</td>
+              <td style="color:#e53935">6.06</td>
+              <td style="color:#e53935">6.71</td>
+              <td style="color:#e53935">6.05</td>
+              <td style="color:#e53935">6.71</td>
+              <td style="color:#e53935">+10.00%</td>
+              <td>1855.0</td>
+              <td>1213.43</td>
+            </tr>
+            <tr>
+              <td>2026-06-16</td>
+              <td style="color:#e53935">5.93</td>
+              <td style="color:#e53935">6.23</td>
+              <td style="color:#e53935">5.86</td>
+              <td style="color:#e53935">6.10</td>
+              <td style="color:#e53935">+3.04%</td>
+              <td>2602.8</td>
+              <td>1582.25</td>
+            </tr>
+            <tr>
+              <td>2026-06-15</td>
+              <td style="color:#e53935">5.74</td>
+              <td style="color:#e53935">6.01</td>
+              <td style="color:#e53935">5.73</td>
+              <td style="color:#e53935">5.92</td>
+              <td style="color:#e53935">+6.28%</td>
+              <td>2992.8</td>
+              <td>1761.01</td>
+            </tr>
+            <tr>
+              <td>2026-06-12</td>
+              <td style="color:#43a047">5.95</td>
+              <td style="color:#43a047">6.01</td>
+              <td style="color:#43a047">5.56</td>
+              <td style="color:#43a047">5.57</td>
+              <td style="color:#43a047">-4.46%</td>
+              <td>2914.6</td>
+              <td>1674.13</td>
+            </tr>
+            <tr>
+              <td>2026-06-11</td>
+              <td style="color:#43a047">6.00</td>
+              <td style="color:#43a047">6.12</td>
+              <td style="color:#43a047">5.70</td>
+              <td style="color:#43a047">5.83</td>
+              <td style="color:#43a047">-3.32%</td>
+              <td>3299.7</td>
+              <td>1943.58</td>
+            </tr>
+            <tr>
+              <td>2026-06-10</td>
+              <td style="color:#43a047">6.34</td>
+              <td style="color:#43a047">6.38</td>
+              <td style="color:#43a047">5.94</td>
+              <td style="color:#43a047">6.03</td>
+              <td style="color:#43a047">-7.52%</td>
+              <td>3228.5</td>
+              <td>1964.59</td>
+            </tr>
+            <tr>
+              <td>2026-06-09</td>
+              <td style="color:#e53935">6.49</td>
+              <td style="color:#e53935">6.64</td>
+              <td style="color:#e53935">6.14</td>
+              <td style="color:#e53935">6.52</td>
+              <td style="color:#e53935">+3.66%</td>
+              <td>4003.2</td>
+              <td>2559.60</td>
+            </tr>
+            <tr>
+              <td>2026-06-08</td>
+              <td style="color:#43a047">6.48</td>
+              <td style="color:#43a047">6.74</td>
+              <td style="color:#43a047">6.22</td>
+              <td style="color:#43a047">6.29</td>
+              <td style="color:#43a047">-2.18%</td>
+              <td>4599.9</td>
+              <td>2970.16</td>
+            </tr>
+            <tr>
+              <td>2026-06-05</td>
+              <td style="color:#e53935">6.11</td>
+              <td style="color:#e53935">6.77</td>
+              <td style="color:#e53935">6.01</td>
+              <td style="color:#e53935">6.43</td>
+              <td style="color:#e53935">+4.55%</td>
+              <td>5504.1</td>
+              <td>3568.48</td>
+            </tr>
+            <tr>
+              <td>2026-06-04</td>
+              <td style="color:#e53935">5.69</td>
+              <td style="color:#e53935">6.15</td>
+              <td style="color:#e53935">5.69</td>
+              <td style="color:#e53935">6.15</td>
+              <td style="color:#e53935">+10.02%</td>
+              <td>3323.0</td>
+              <td>1995.03</td>
+            </tr>
+            <tr>
+              <td>2026-06-03</td>
+              <td style="color:#e53935">5.58</td>
+              <td style="color:#e53935">5.92</td>
+              <td style="color:#e53935">5.53</td>
+              <td style="color:#e53935">5.59</td>
+              <td style="color:#e53935">+2.19%</td>
+              <td>3679.8</td>
+              <td>2098.50</td>
+            </tr>
+            <tr>
+              <td>2026-06-02</td>
+              <td style="color:#e53935">5.31</td>
+              <td style="color:#e53935">5.54</td>
+              <td style="color:#e53935">5.11</td>
+              <td style="color:#e53935">5.47</td>
+              <td style="color:#e53935">+2.05%</td>
+              <td>3025.8</td>
+              <td>1614.70</td>
+            </tr>
+            <tr>
+              <td>2026-06-01</td>
+              <td style="color:#e53935">5.12</td>
+              <td style="color:#e53935">5.59</td>
+              <td style="color:#e53935">5.12</td>
+              <td style="color:#e53935">5.36</td>
+              <td style="color:#e53935">+4.89%</td>
+              <td>3386.9</td>
+              <td>1829.74</td>
+            </tr>
+            <tr>
+              <td>2026-05-29</td>
+              <td style="color:#43a047">5.63</td>
+              <td style="color:#43a047">5.64</td>
+              <td style="color:#43a047">5.11</td>
+              <td style="color:#43a047">5.11</td>
+              <td style="color:#43a047">-10.04%</td>
+              <td>3625.4</td>
+              <td>1913.58</td>
+            </tr>
+            <tr>
+              <td>2026-05-28</td>
+              <td style="color:#43a047">5.72</td>
+              <td style="color:#43a047">5.78</td>
+              <td style="color:#43a047">5.51</td>
+              <td style="color:#43a047">5.68</td>
+              <td style="color:#43a047">-0.70%</td>
+              <td>3285.5</td>
+              <td>1852.90</td>
+            </tr>
+            <tr>
+              <td>2026-05-27</td>
+              <td style="color:#43a047">5.80</td>
+              <td style="color:#43a047">6.09</td>
+              <td style="color:#43a047">5.53</td>
+              <td style="color:#43a047">5.72</td>
+              <td style="color:#43a047">-0.87%</td>
+              <td>5018.5</td>
+              <td>2901.27</td>
+            </tr>
+            <tr>
+              <td>2026-05-26</td>
+              <td style="color:#e53935">5.22</td>
+              <td style="color:#e53935">5.80</td>
+              <td style="color:#e53935">5.18</td>
+              <td style="color:#e53935">5.77</td>
+              <td style="color:#e53935">+9.49%</td>
+              <td>5137.7</td>
+              <td>2864.57</td>
+            </tr>
+            <tr>
+              <td>2026-05-25</td>
+              <td style="color:#e53935">5.17</td>
+              <td style="color:#e53935">5.37</td>
+              <td style="color:#e53935">5.06</td>
+              <td style="color:#e53935">5.27</td>
+              <td style="color:#e53935">+2.13%</td>
+              <td>4308.9</td>
+              <td>2249.89</td>
+            </tr>
+            <tr>
+              <td>2026-05-22</td>
+              <td style="color:#e53935">4.70</td>
+              <td style="color:#e53935">5.16</td>
+              <td style="color:#e53935">4.47</td>
+              <td style="color:#e53935">5.16</td>
+              <td style="color:#e53935">+10.02%</td>
+              <td>6011.1</td>
+              <td>2916.29</td>
+            </tr>
+            <tr>
+              <td>2026-05-21</td>
+              <td style="color:#e53935">4.69</td>
+              <td style="color:#e53935">4.69</td>
+              <td style="color:#e53935">4.69</td>
+              <td style="color:#e53935">4.69</td>
+              <td style="color:#e53935">+10.09%</td>
+              <td>1036.0</td>
+              <td>485.89</td>
+            </tr>
+            <tr>
+              <td>2026-05-20</td>
+              <td style="color:#43a047">4.29</td>
+              <td style="color:#43a047">4.31</td>
+              <td style="color:#43a047">4.24</td>
+              <td style="color:#43a047">4.26</td>
+              <td style="color:#43a047">-1.16%</td>
+              <td>571.8</td>
+              <td>244.08</td>
+            </tr>
+            <tr>
+              <td>2026-05-19</td>
+              <td style="color:#e53935">4.20</td>
+              <td style="color:#e53935">4.32</td>
+              <td style="color:#e53935">4.17</td>
+              <td style="color:#e53935">4.31</td>
+              <td style="color:#e53935">+2.38%</td>
+              <td>880.1</td>
+              <td>374.06</td>
+            </tr>
+            <tr>
+              <td>2026-05-18</td>
+              <td style="color:#e53935">4.12</td>
+              <td style="color:#e53935">4.23</td>
+              <td style="color:#e53935">4.08</td>
+              <td style="color:#e53935">4.21</td>
+              <td style="color:#e53935">+1.69%</td>
+              <td>840.0</td>
+              <td>351.20</td>
+            </tr>
+            <tr>
+              <td>2026-05-15</td>
+              <td style="color:#43a047">4.22</td>
+              <td style="color:#43a047">4.24</td>
+              <td style="color:#43a047">4.12</td>
+              <td style="color:#43a047">4.14</td>
+              <td style="color:#43a047">-1.90%</td>
+              <td>821.6</td>
+              <td>341.84</td>
+            </tr>
+            <tr>
+              <td>2026-05-14</td>
+              <td style="color:#43a047">4.28</td>
+              <td style="color:#43a047">4.33</td>
+              <td style="color:#43a047">4.20</td>
+              <td style="color:#43a047">4.22</td>
+              <td style="color:#43a047">-0.24%</td>
+              <td>876.1</td>
+              <td>373.26</td>
+            </tr>
+            <tr>
+              <td>2026-05-13</td>
+              <td style="color:#e53935">4.17</td>
+              <td style="color:#e53935">4.23</td>
+              <td style="color:#e53935">4.15</td>
+              <td style="color:#e53935">4.23</td>
+              <td style="color:#e53935">+1.44%</td>
+              <td>638.2</td>
+              <td>267.88</td>
+            </tr>
+            <tr>
+              <td>2026-05-12</td>
+              <td style="color:#43a047">4.19</td>
+              <td style="color:#43a047">4.23</td>
+              <td style="color:#43a047">4.14</td>
+              <td style="color:#43a047">4.17</td>
+              <td style="color:#43a047">-0.48%</td>
+              <td>618.5</td>
+              <td>259.05</td>
+            </tr>
+            <tr>
+              <td>2026-05-11</td>
+              <td style="color:#e53935">4.17</td>
+              <td style="color:#e53935">4.23</td>
+              <td style="color:#e53935">4.16</td>
+              <td style="color:#e53935">4.19</td>
+              <td style="color:#e53935">+0.48%</td>
+              <td>610.1</td>
+              <td>255.63</td>
+            </tr>
+            <tr>
+              <td>2026-05-08</td>
+              <td style="color:#43a047">4.19</td>
+              <td style="color:#43a047">4.19</td>
+              <td style="color:#43a047">4.12</td>
+              <td style="color:#43a047">4.17</td>
+              <td style="color:#43a047">-0.95%</td>
+              <td>637.9</td>
+              <td>264.61</td>
+            </tr>
+            <tr>
+              <td>2026-05-07</td>
+              <td style="color:#e53935">4.20</td>
+              <td style="color:#e53935">4.25</td>
+              <td style="color:#e53935">4.16</td>
+              <td style="color:#e53935">4.21</td>
+              <td style="color:#e53935">+0.72%</td>
+              <td>665.0</td>
+              <td>279.70</td>
+            </tr>
+            <tr>
+              <td>2026-05-06</td>
+              <td style="color:#e53935">4.11</td>
+              <td style="color:#e53935">4.22</td>
+              <td style="color:#e53935">4.09</td>
+              <td style="color:#e53935">4.18</td>
+              <td style="color:#e53935">+2.45%</td>
+              <td>828.0</td>
+              <td>343.67</td>
+            </tr>
+            <tr>
+              <td>2026-04-30</td>
+              <td style="color:#43a047">4.13</td>
+              <td style="color:#43a047">4.18</td>
+              <td style="color:#43a047">4.08</td>
+              <td style="color:#43a047">4.08</td>
+              <td style="color:#43a047">-2.16%</td>
+              <td>745.4</td>
+              <td>306.01</td>
+            </tr>
+            <tr>
+              <td>2026-04-29</td>
+              <td style="color:#e53935">4.14</td>
+              <td style="color:#e53935">4.18</td>
+              <td style="color:#e53935">4.12</td>
+              <td style="color:#e53935">4.17</td>
+              <td style="color:#e53935">+0.48%</td>
+              <td>414.0</td>
+              <td>171.92</td>
+            </tr>
+            <tr>
+              <td>2026-04-28</td>
+              <td style="color:#43a047">4.20</td>
+              <td style="color:#43a047">4.21</td>
+              <td style="color:#43a047">4.14</td>
+              <td style="color:#43a047">4.15</td>
+              <td style="color:#43a047">-1.43%</td>
+              <td>395.4</td>
+              <td>164.72</td>
+            </tr>
+            <tr>
+              <td>2026-04-27</td>
+              <td style="color:#e53935">4.15</td>
+              <td style="color:#e53935">4.22</td>
+              <td style="color:#e53935">4.13</td>
+              <td style="color:#e53935">4.21</td>
+              <td style="color:#e53935">+1.94%</td>
+              <td>482.4</td>
+              <td>201.87</td>
+            </tr>
+            <tr>
+              <td>2026-04-24</td>
+              <td style="color:#43a047">4.17</td>
+              <td style="color:#43a047">4.19</td>
+              <td style="color:#43a047">4.11</td>
+              <td style="color:#43a047">4.13</td>
+              <td style="color:#43a047">-1.43%</td>
+              <td>460.1</td>
+              <td>190.54</td>
+            </tr>
+            <tr>
+              <td>2026-04-23</td>
+              <td style="color:#43a047">4.26</td>
+              <td style="color:#43a047">4.29</td>
+              <td style="color:#43a047">4.17</td>
+              <td style="color:#43a047">4.19</td>
+              <td style="color:#43a047">-1.87%</td>
+              <td>691.5</td>
+              <td>291.53</td>
+            </tr>
+            <tr>
+              <td>2026-04-22</td>
+              <td style="color:#e53935">4.20</td>
+              <td style="color:#e53935">4.28</td>
+              <td style="color:#e53935">4.20</td>
+              <td style="color:#e53935">4.27</td>
+              <td style="color:#e53935">+1.18%</td>
+              <td>681.3</td>
+              <td>289.62</td>
+            </tr>
+            <tr>
+              <td>2026-04-21</td>
+              <td style="color:#e53935">4.19</td>
+              <td style="color:#e53935">4.34</td>
+              <td style="color:#e53935">4.14</td>
+              <td style="color:#e53935">4.22</td>
+              <td style="color:#e53935">+0.72%</td>
+              <td>1134.8</td>
+              <td>478.58</td>
+            </tr>
+            <tr>
+              <td>2026-04-20</td>
+              <td style="color:#e53935">4.06</td>
+              <td style="color:#e53935">4.24</td>
+              <td style="color:#e53935">4.05</td>
+              <td style="color:#e53935">4.19</td>
+              <td style="color:#e53935">+4.23%</td>
+              <td>1190.5</td>
+              <td>493.96</td>
+            </tr>
+            <tr>
+              <td>2026-04-17</td>
+              <td style="color:#43a047">4.01</td>
+              <td style="color:#43a047">4.04</td>
+              <td style="color:#43a047">4.00</td>
+              <td style="color:#43a047">4.02</td>
+              <td style="color:#43a047">-0.25%</td>
+              <td>309.9</td>
+              <td>124.50</td>
+            </tr>
+            <tr>
+              <td>2026-04-16</td>
+              <td style="color:#e53935">4.01</td>
+              <td style="color:#e53935">4.04</td>
+              <td style="color:#e53935">3.98</td>
+              <td style="color:#e53935">4.03</td>
+              <td style="color:#e53935">+0.75%</td>
+              <td>415.4</td>
+              <td>166.39</td>
+            </tr>
+            <tr>
+              <td>2026-04-15</td>
+              <td style="color:#43a047">4.04</td>
+              <td style="color:#43a047">4.06</td>
+              <td style="color:#43a047">4.00</td>
+              <td style="color:#43a047">4.00</td>
+              <td style="color:#43a047">-0.50%</td>
+              <td>534.9</td>
+              <td>215.48</td>
+            </tr>
+            <tr>
+              <td>2026-04-14</td>
+              <td style="color:#43a047">4.05</td>
+              <td style="color:#43a047">4.08</td>
+              <td style="color:#43a047">3.99</td>
+              <td style="color:#43a047">4.02</td>
+              <td style="color:#43a047">-0.25%</td>
+              <td>442.7</td>
+              <td>178.08</td>
+            </tr>
+            <tr>
+              <td>2026-04-13</td>
+              <td style="color:#43a047">4.01</td>
+              <td style="color:#43a047">4.04</td>
+              <td style="color:#43a047">3.99</td>
+              <td style="color:#43a047">4.03</td>
+              <td style="color:#43a047">-0.25%</td>
+              <td>404.6</td>
+              <td>162.70</td>
+            </tr>
+            <tr>
+              <td>2026-04-10</td>
+              <td style="color:#e53935">4.05</td>
+              <td style="color:#e53935">4.08</td>
+              <td style="color:#e53935">4.03</td>
+              <td style="color:#e53935">4.04</td>
+              <td style="color:#e53935">+0.75%</td>
+              <td>462.3</td>
+              <td>187.47</td>
+            </tr>
+            <tr>
+              <td>2026-04-09</td>
+              <td style="color:#43a047">3.99</td>
+              <td style="color:#43a047">4.03</td>
+              <td style="color:#43a047">3.97</td>
+              <td style="color:#43a047">4.01</td>
+              <td style="color:#43a047">-0.50%</td>
+              <td>418.3</td>
+              <td>167.41</td>
+            </tr>
+            <tr>
+              <td>2026-04-08</td>
+              <td style="color:#e53935">3.98</td>
+              <td style="color:#e53935">4.04</td>
+              <td style="color:#e53935">3.95</td>
+              <td style="color:#e53935">4.03</td>
+              <td style="color:#e53935">+3.07%</td>
+              <td>579.1</td>
+              <td>231.32</td>
+            </tr>
+            <tr>
+              <td>2026-04-07</td>
+              <td style="color:#43a047">3.95</td>
+              <td style="color:#43a047">3.95</td>
+              <td style="color:#43a047">3.89</td>
+              <td style="color:#43a047">3.91</td>
+              <td style="color:#43a047">-0.51%</td>
+              <td>346.5</td>
+              <td>135.74</td>
+            </tr>
+            <tr>
+              <td>2026-04-03</td>
+              <td style="color:#43a047">3.96</td>
+              <td style="color:#43a047">3.97</td>
+              <td style="color:#43a047">3.92</td>
+              <td style="color:#43a047">3.93</td>
+              <td style="color:#43a047">-0.51%</td>
+              <td>277.1</td>
+              <td>109.10</td>
+            </tr>
+            <tr>
+              <td>2026-04-02</td>
+              <td style="color:#43a047">4.01</td>
+              <td style="color:#43a047">4.01</td>
+              <td style="color:#43a047">3.93</td>
+              <td style="color:#43a047">3.95</td>
+              <td style="color:#43a047">-1.50%</td>
+              <td>390.4</td>
+              <td>154.82</td>
+            </tr>
+            <tr>
+              <td>2026-04-01</td>
+              <td style="color:#e53935">4.01</td>
+              <td style="color:#e53935">4.06</td>
+              <td style="color:#e53935">3.97</td>
+              <td style="color:#e53935">4.01</td>
+              <td style="color:#e53935">+2.56%</td>
+              <td>583.1</td>
+              <td>234.07</td>
+            </tr>
+            <tr>
+              <td>2026-03-31</td>
+              <td style="color:#43a047">3.93</td>
+              <td style="color:#43a047">3.97</td>
+              <td style="color:#43a047">3.90</td>
+              <td style="color:#43a047">3.91</td>
+              <td style="color:#43a047">-0.76%</td>
+              <td>389.3</td>
+              <td>153.26</td>
+            </tr>
+            <tr>
+              <td>2026-03-30</td>
+              <td style="color:#43a047">3.91</td>
+              <td style="color:#43a047">3.95</td>
+              <td style="color:#43a047">3.89</td>
+              <td style="color:#43a047">3.94</td>
+              <td style="color:#43a047">-0.25%</td>
+              <td>356.7</td>
+              <td>139.95</td>
+            </tr>
+            <tr>
+              <td>2026-03-27</td>
+              <td style="color:#e53935">3.91</td>
+              <td style="color:#e53935">3.97</td>
+              <td style="color:#e53935">3.90</td>
+              <td style="color:#e53935">3.95</td>
+              <td style="color:#e53935">+0.25%</td>
+              <td>356.6</td>
+              <td>140.87</td>
+            </tr>
+            <tr>
+              <td>2026-03-26</td>
+              <td style="color:#43a047">3.99</td>
+              <td style="color:#43a047">4.01</td>
+              <td style="color:#43a047">3.93</td>
+              <td style="color:#43a047">3.94</td>
+              <td style="color:#43a047">-1.25%</td>
+              <td>394.3</td>
+              <td>156.28</td>
+            </tr>
+            <tr>
+              <td>2026-03-25</td>
+              <td style="color:#43a047">4.03</td>
+              <td style="color:#43a047">4.04</td>
+              <td style="color:#43a047">3.98</td>
+              <td style="color:#43a047">3.99</td>
+              <td style="color:#43a047">-0.25%</td>
+              <td>439.3</td>
+              <td>176.01</td>
+            </tr>
+            <tr>
+              <td>2026-03-24</td>
+              <td style="color:#e53935">3.92</td>
+              <td style="color:#e53935">4.00</td>
+              <td style="color:#e53935">3.90</td>
+              <td style="color:#e53935">4.00</td>
+              <td style="color:#e53935">+3.36%</td>
+              <td>584.0</td>
+              <td>230.27</td>
+            </tr>
+            <tr>
+              <td>2026-03-23</td>
+              <td style="color:#43a047">4.01</td>
+              <td style="color:#43a047">4.02</td>
+              <td style="color:#43a047">3.85</td>
+              <td style="color:#43a047">3.87</td>
+              <td style="color:#43a047">-5.15%</td>
+              <td>913.9</td>
+              <td>358.48</td>
+            </tr>
+            <tr>
+              <td>2026-03-20</td>
+              <td style="color:#43a047">4.11</td>
+              <td style="color:#43a047">4.15</td>
+              <td style="color:#43a047">4.07</td>
+              <td style="color:#43a047">4.08</td>
+              <td style="color:#43a047">-0.24%</td>
+              <td>484.3</td>
+              <td>199.36</td>
+            </tr>
+            <tr>
+              <td>2026-03-19</td>
+              <td style="color:#43a047">4.15</td>
+              <td style="color:#43a047">4.16</td>
+              <td style="color:#43a047">4.08</td>
+              <td style="color:#43a047">4.09</td>
+              <td style="color:#43a047">-2.62%</td>
+              <td>520.3</td>
+              <td>213.99</td>
+            </tr>
+            <tr>
+              <td>2026-03-18</td>
+              <td style="color:#e53935">4.23</td>
+              <td style="color:#e53935">4.23</td>
+              <td style="color:#e53935">4.15</td>
+              <td style="color:#e53935">4.20</td>
+              <td style="color:#e53935">+0.48%</td>
+              <td>505.1</td>
+              <td>211.15</td>
+            </tr>
+            <tr>
+              <td>2026-03-17</td>
+              <td style="color:#43a047">4.25</td>
+              <td style="color:#43a047">4.27</td>
+              <td style="color:#43a047">4.18</td>
+              <td style="color:#43a047">4.18</td>
+              <td style="color:#43a047">-1.18%</td>
+              <td>514.4</td>
+              <td>217.15</td>
+            </tr>
+            <tr>
+              <td>2026-03-16</td>
+              <td style="color:#43a047">4.34</td>
+              <td style="color:#43a047">4.34</td>
+              <td style="color:#43a047">4.20</td>
+              <td style="color:#43a047">4.23</td>
+              <td style="color:#43a047">-2.98%</td>
+              <td>906.1</td>
+              <td>384.23</td>
+            </tr>
+            <tr>
+              <td>2026-03-13</td>
+              <td style="color:#43a047">4.40</td>
+              <td style="color:#43a047">4.45</td>
+              <td style="color:#43a047">4.35</td>
+              <td style="color:#43a047">4.36</td>
+              <td style="color:#43a047">-1.36%</td>
+              <td>529.0</td>
+              <td>232.87</td>
+            </tr>
+            <tr>
+              <td>2026-03-12</td>
+              <td style="color:#e53935">4.40</td>
+              <td style="color:#e53935">4.47</td>
+              <td style="color:#e53935">4.38</td>
+              <td style="color:#e53935">4.42</td>
+              <td style="color:#e53935">+0.68%</td>
+              <td>753.5</td>
+              <td>333.27</td>
+            </tr>
+            <tr>
+              <td>2026-03-11</td>
+              <td style="color:#e53935">4.34</td>
+              <td style="color:#e53935">4.40</td>
+              <td style="color:#e53935">4.33</td>
+              <td style="color:#e53935">4.39</td>
+              <td style="color:#e53935">+0.92%</td>
+              <td>581.7</td>
+              <td>254.29</td>
+            </tr>
+            <tr>
+              <td>2026-03-10</td>
+              <td style="color:#e53935">4.35</td>
+              <td style="color:#e53935">4.39</td>
+              <td style="color:#e53935">4.33</td>
+              <td style="color:#e53935">4.35</td>
+              <td style="color:#e53935">+0.93%</td>
+              <td>572.1</td>
+              <td>249.47</td>
+            </tr>
+            <tr>
+              <td>2026-03-09</td>
+              <td style="color:#43a047">4.31</td>
+              <td style="color:#43a047">4.33</td>
+              <td style="color:#43a047">4.22</td>
+              <td style="color:#43a047">4.31</td>
+              <td style="color:#43a047">-1.37%</td>
+              <td>842.8</td>
+              <td>359.30</td>
+            </tr>
+            <tr>
+              <td>2026-03-06</td>
+              <td style="color:#43a047">4.42</td>
+              <td style="color:#43a047">4.43</td>
+              <td style="color:#43a047">4.31</td>
+              <td style="color:#43a047">4.37</td>
+              <td style="color:#43a047">-2.02%</td>
+              <td>938.0</td>
+              <td>408.57</td>
+            </tr>
+            <tr>
+              <td>2026-03-05</td>
+              <td style="color:#e53935">4.38</td>
+              <td style="color:#e53935">4.53</td>
+              <td style="color:#e53935">4.38</td>
+              <td style="color:#e53935">4.46</td>
+              <td style="color:#e53935">+3.24%</td>
+              <td>1040.3</td>
+              <td>466.07</td>
+            </tr>
+            <tr>
+              <td>2026-03-04</td>
+              <td style="color:#e53935">4.29</td>
+              <td style="color:#e53935">4.38</td>
+              <td style="color:#e53935">4.26</td>
+              <td style="color:#e53935">4.32</td>
+              <td style="color:#e53935">+0.00%</td>
+              <td>679.5</td>
+              <td>294.27</td>
+            </tr>
+            <tr>
+              <td>2026-03-03</td>
+              <td style="color:#43a047">4.51</td>
+              <td style="color:#43a047">4.53</td>
+              <td style="color:#43a047">4.31</td>
+              <td style="color:#43a047">4.32</td>
+              <td style="color:#43a047">-3.79%</td>
+              <td>932.4</td>
+              <td>409.33</td>
+            </tr>
+            <tr>
+              <td>2026-03-02</td>
+              <td style="color:#e53935">4.44</td>
+              <td style="color:#e53935">4.59</td>
+              <td style="color:#e53935">4.43</td>
+              <td style="color:#e53935">4.49</td>
+              <td style="color:#e53935">+0.22%</td>
+              <td>1024.7</td>
+              <td>462.66</td>
+            </tr>
+            <tr>
+              <td>2026-02-27</td>
+              <td style="color:#e53935">4.33</td>
+              <td style="color:#e53935">4.49</td>
+              <td style="color:#e53935">4.32</td>
+              <td style="color:#e53935">4.48</td>
+              <td style="color:#e53935">+3.46%</td>
+              <td>1099.3</td>
+              <td>486.90</td>
+            </tr>
+            <tr>
+              <td>2026-02-26</td>
+              <td style="color:#43a047">4.38</td>
+              <td style="color:#43a047">4.38</td>
+              <td style="color:#43a047">4.32</td>
+              <td style="color:#43a047">4.33</td>
+              <td style="color:#43a047">-0.69%</td>
+              <td>460.0</td>
+              <td>199.84</td>
+            </tr>
+            <tr>
+              <td>2026-02-25</td>
+              <td style="color:#e53935">4.29</td>
+              <td style="color:#e53935">4.39</td>
+              <td style="color:#e53935">4.28</td>
+              <td style="color:#e53935">4.36</td>
+              <td style="color:#e53935">+1.87%</td>
+              <td>601.2</td>
+              <td>260.80</td>
+            </tr>
+            <tr>
+              <td>2026-02-24</td>
+              <td style="color:#e53935">4.22</td>
+              <td style="color:#e53935">4.30</td>
+              <td style="color:#e53935">4.21</td>
+              <td style="color:#e53935">4.28</td>
+              <td style="color:#e53935">+2.39%</td>
+              <td>540.1</td>
+              <td>230.71</td>
+            </tr>
+            <tr>
+              <td>2026-02-13</td>
+              <td style="color:#43a047">4.21</td>
+              <td style="color:#43a047">4.23</td>
+              <td style="color:#43a047">4.17</td>
+              <td style="color:#43a047">4.18</td>
+              <td style="color:#43a047">-1.18%</td>
+              <td>537.4</td>
+              <td>225.39</td>
+            </tr>
+            <tr>
+              <td>2026-02-12</td>
+              <td style="color:#43a047">4.29</td>
+              <td style="color:#43a047">4.30</td>
+              <td style="color:#43a047">4.22</td>
+              <td style="color:#43a047">4.23</td>
+              <td style="color:#43a047">-1.40%</td>
+              <td>517.7</td>
+              <td>219.85</td>
+            </tr>
+            <tr>
+              <td>2026-02-11</td>
+              <td style="color:#43a047">4.31</td>
+              <td style="color:#43a047">4.34</td>
+              <td style="color:#43a047">4.28</td>
+              <td style="color:#43a047">4.29</td>
+              <td style="color:#43a047">-0.69%</td>
+              <td>372.0</td>
+              <td>160.13</td>
+            </tr>
+            <tr>
+              <td>2026-02-10</td>
+              <td style="color:#43a047">4.34</td>
+              <td style="color:#43a047">4.35</td>
+              <td style="color:#43a047">4.27</td>
+              <td style="color:#43a047">4.32</td>
+              <td style="color:#43a047">-0.69%</td>
+              <td>447.7</td>
+              <td>192.79</td>
+            </tr>
+            <tr>
+              <td>2026-02-09</td>
+              <td style="color:#43a047">4.41</td>
+              <td style="color:#43a047">4.42</td>
+              <td style="color:#43a047">4.33</td>
+              <td style="color:#43a047">4.35</td>
+              <td style="color:#43a047">-0.46%</td>
+              <td>536.2</td>
+              <td>233.78</td>
+            </tr>
+            <tr>
+              <td>2026-02-06</td>
+              <td style="color:#43a047">4.38</td>
+              <td style="color:#43a047">4.42</td>
+              <td style="color:#43a047">4.34</td>
+              <td style="color:#43a047">4.37</td>
+              <td style="color:#43a047">-0.91%</td>
+              <td>493.8</td>
+              <td>216.37</td>
+            </tr>
+            <tr>
+              <td>2026-02-05</td>
+              <td style="color:#e53935">4.37</td>
+              <td style="color:#e53935">4.41</td>
+              <td style="color:#e53935">4.34</td>
+              <td style="color:#e53935">4.41</td>
+              <td style="color:#e53935">+0.46%</td>
+              <td>605.3</td>
+              <td>265.04</td>
+            </tr>
+            <tr>
+              <td>2026-02-04</td>
+              <td style="color:#e53935">4.30</td>
+              <td style="color:#e53935">4.42</td>
+              <td style="color:#e53935">4.29</td>
+              <td style="color:#e53935">4.39</td>
+              <td style="color:#e53935">+1.86%</td>
+              <td>745.4</td>
+              <td>326.22</td>
+            </tr>
+            <tr>
+              <td>2026-02-03</td>
+              <td style="color:#e53935">4.30</td>
+              <td style="color:#e53935">4.33</td>
+              <td style="color:#e53935">4.22</td>
+              <td style="color:#e53935">4.31</td>
+              <td style="color:#e53935">+1.65%</td>
+              <td>629.9</td>
+              <td>269.20</td>
+            </tr>
+            <tr>
+              <td>2026-02-02</td>
+              <td style="color:#43a047">4.32</td>
+              <td style="color:#43a047">4.37</td>
+              <td style="color:#43a047">4.23</td>
+              <td style="color:#43a047">4.24</td>
+              <td style="color:#43a047">-2.97%</td>
+              <td>724.9</td>
+              <td>311.67</td>
+            </tr>
+            <tr>
+              <td>2026-01-30</td>
+              <td style="color:#43a047">4.43</td>
+              <td style="color:#43a047">4.45</td>
+              <td style="color:#43a047">4.25</td>
+              <td style="color:#43a047">4.37</td>
+              <td style="color:#43a047">-1.80%</td>
+              <td>962.4</td>
+              <td>417.30</td>
+            </tr>
+            <tr>
+              <td>2026-01-29</td>
+              <td style="color:#43a047">4.52</td>
+              <td style="color:#43a047">4.54</td>
+              <td style="color:#43a047">4.41</td>
+              <td style="color:#43a047">4.45</td>
+              <td style="color:#43a047">-1.77%</td>
+              <td>864.0</td>
+              <td>385.77</td>
+            </tr>
+            <tr>
+              <td>2026-01-28</td>
+              <td style="color:#43a047">4.55</td>
+              <td style="color:#43a047">4.58</td>
+              <td style="color:#43a047">4.50</td>
+              <td style="color:#43a047">4.53</td>
+              <td style="color:#43a047">-0.66%</td>
+              <td>812.3</td>
+              <td>368.24</td>
+            </tr>
+            <tr>
+              <td>2026-01-27</td>
+              <td style="color:#e53935">4.47</td>
+              <td style="color:#e53935">4.60</td>
+              <td style="color:#e53935">4.45</td>
+              <td style="color:#e53935">4.56</td>
+              <td style="color:#e53935">+2.01%</td>
+              <td>1098.5</td>
+              <td>498.19</td>
+            </tr>
+            <tr>
+              <td>2026-01-26</td>
+              <td style="color:#e53935">4.48</td>
+              <td style="color:#e53935">4.55</td>
+              <td style="color:#e53935">4.47</td>
+              <td style="color:#e53935">4.47</td>
+              <td style="color:#e53935">+0.45%</td>
+              <td>898.4</td>
+              <td>404.94</td>
+            </tr>
+            <tr>
+              <td>2026-01-23</td>
+              <td style="color:#e53935">4.41</td>
+              <td style="color:#e53935">4.51</td>
+              <td style="color:#e53935">4.39</td>
+              <td style="color:#e53935">4.45</td>
+              <td style="color:#e53935">+1.14%</td>
+              <td>1066.7</td>
+              <td>475.88</td>
+            </tr>
+            <tr>
+              <td>2026-01-22</td>
+              <td style="color:#43a047">4.46</td>
+              <td style="color:#43a047">4.48</td>
+              <td style="color:#43a047">4.38</td>
+              <td style="color:#43a047">4.40</td>
+              <td style="color:#43a047">-1.35%</td>
+              <td>785.6</td>
+              <td>346.44</td>
+            </tr>
+            <tr>
+              <td>2026-01-21</td>
+              <td style="color:#e53935">4.44</td>
+              <td style="color:#e53935">4.51</td>
+              <td style="color:#e53935">4.43</td>
+              <td style="color:#e53935">4.46</td>
+              <td style="color:#e53935">+0.22%</td>
+              <td>744.9</td>
+              <td>332.94</td>
+            </tr>
+            <tr>
+              <td>2026-01-20</td>
+              <td style="color:#43a047">4.51</td>
+              <td style="color:#43a047">4.53</td>
+              <td style="color:#43a047">4.42</td>
+              <td style="color:#43a047">4.45</td>
+              <td style="color:#43a047">-1.33%</td>
+              <td>745.3</td>
+              <td>331.67</td>
+            </tr>
+            <tr>
+              <td>2026-01-19</td>
+              <td style="color:#e53935">4.43</td>
+              <td style="color:#e53935">4.54</td>
+              <td style="color:#e53935">4.42</td>
+              <td style="color:#e53935">4.51</td>
+              <td style="color:#e53935">+1.12%</td>
+              <td>704.7</td>
+              <td>317.11</td>
+            </tr>
+            <tr>
+              <td>2026-01-16</td>
+              <td style="color:#43a047">4.55</td>
+              <td style="color:#43a047">4.57</td>
+              <td style="color:#43a047">4.44</td>
+              <td style="color:#43a047">4.46</td>
+              <td style="color:#43a047">-1.55%</td>
+              <td>867.0</td>
+              <td>387.70</td>
+            </tr>
+            <tr>
+              <td>2026-01-15</td>
+              <td style="color:#43a047">4.54</td>
+              <td style="color:#43a047">4.61</td>
+              <td style="color:#43a047">4.50</td>
+              <td style="color:#43a047">4.53</td>
+              <td style="color:#43a047">-1.52%</td>
+              <td>870.1</td>
+              <td>395.57</td>
+            </tr>
+            <tr>
+              <td>2026-01-14</td>
+              <td style="color:#e53935">4.54</td>
+              <td style="color:#e53935">4.73</td>
+              <td style="color:#e53935">4.53</td>
+              <td style="color:#e53935">4.60</td>
+              <td style="color:#e53935">+3.14%</td>
+              <td>1772.5</td>
+              <td>819.90</td>
+            </tr>
+            <tr>
+              <td>2026-01-13</td>
+              <td style="color:#e53935">4.48</td>
+              <td style="color:#e53935">4.55</td>
+              <td style="color:#e53935">4.44</td>
+              <td style="color:#e53935">4.46</td>
+              <td style="color:#e53935">+0.00%</td>
+              <td>913.8</td>
+              <td>409.47</td>
+            </tr>
+            <tr>
+              <td>2026-01-12</td>
+              <td style="color:#e53935">4.45</td>
+              <td style="color:#e53935">4.51</td>
+              <td style="color:#e53935">4.43</td>
+              <td style="color:#e53935">4.46</td>
+              <td style="color:#e53935">+1.13%</td>
+              <td>867.3</td>
+              <td>388.07</td>
+            </tr>
+            <tr>
+              <td>2026-01-09</td>
+              <td style="color:#e53935">4.34</td>
+              <td style="color:#e53935">4.54</td>
+              <td style="color:#e53935">4.33</td>
+              <td style="color:#e53935">4.41</td>
+              <td style="color:#e53935">+1.38%</td>
+              <td>1073.5</td>
+              <td>476.93</td>
+            </tr>
+            <tr>
+              <td>2026-01-08</td>
+              <td style="color:#43a047">4.35</td>
+              <td style="color:#43a047">4.39</td>
+              <td style="color:#43a047">4.32</td>
+              <td style="color:#43a047">4.35</td>
+              <td style="color:#43a047">-0.23%</td>
+              <td>680.5</td>
+              <td>296.19</td>
+            </tr>
+            <tr>
+              <td>2026-01-07</td>
+              <td style="color:#43a047">4.45</td>
+              <td style="color:#43a047">4.47</td>
+              <td style="color:#43a047">4.33</td>
+              <td style="color:#43a047">4.36</td>
+              <td style="color:#43a047">-3.11%</td>
+              <td>1275.9</td>
+              <td>558.07</td>
+            </tr>
+            <tr>
+              <td>2026-01-06</td>
+              <td style="color:#e53935">4.24</td>
+              <td style="color:#e53935">4.54</td>
+              <td style="color:#e53935">4.23</td>
+              <td style="color:#e53935">4.50</td>
+              <td style="color:#e53935">+6.38%</td>
+              <td>2103.8</td>
+              <td>930.53</td>
+            </tr>
+            <tr>
+              <td>2026-01-05</td>
+              <td style="color:#e53935">4.22</td>
+              <td style="color:#e53935">4.27</td>
+              <td style="color:#e53935">4.19</td>
+              <td style="color:#e53935">4.23</td>
+              <td style="color:#e53935">+0.48%</td>
+              <td>850.8</td>
+              <td>359.44</td>
+            </tr>
+            <tr>
+              <td>2025-12-31</td>
+              <td style="color:#e53935">4.17</td>
+              <td style="color:#e53935">4.27</td>
+              <td style="color:#e53935">4.15</td>
+              <td style="color:#e53935">4.21</td>
+              <td style="color:#e53935">+0.96%</td>
+              <td>817.9</td>
+              <td>344.53</td>
+            </tr>
+            <tr>
+              <td>2025-12-30</td>
+              <td style="color:#e53935">4.12</td>
+              <td style="color:#e53935">4.20</td>
+              <td style="color:#e53935">4.11</td>
+              <td style="color:#e53935">4.17</td>
+              <td style="color:#e53935">+0.97%</td>
+              <td>610.0</td>
+              <td>254.22</td>
+            </tr>
+            <tr>
+              <td>2025-12-29</td>
+              <td style="color:#e53935">4.05</td>
+              <td style="color:#e53935">4.20</td>
+              <td style="color:#e53935">4.04</td>
+              <td style="color:#e53935">4.13</td>
+              <td style="color:#e53935">+2.23%</td>
+              <td>922.3</td>
+              <td>381.01</td>
+            </tr>
+            <tr>
+              <td>2025-12-26</td>
+              <td style="color:#43a047">4.06</td>
+              <td style="color:#43a047">4.07</td>
+              <td style="color:#43a047">4.03</td>
+              <td style="color:#43a047">4.04</td>
+              <td style="color:#43a047">-0.49%</td>
+              <td>374.6</td>
+              <td>151.75</td>
+            </tr>
+            <tr>
+              <td>2025-12-25</td>
+              <td style="color:#e53935">4.05</td>
+              <td style="color:#e53935">4.08</td>
+              <td style="color:#e53935">4.05</td>
+              <td style="color:#e53935">4.06</td>
+              <td style="color:#e53935">+0.00%</td>
+              <td>354.4</td>
+              <td>144.10</td>
+            </tr>
+            <tr>
+              <td>2025-12-24</td>
+              <td style="color:#e53935">4.03</td>
+              <td style="color:#e53935">4.07</td>
+              <td style="color:#e53935">4.00</td>
+              <td style="color:#e53935">4.06</td>
+              <td style="color:#e53935">+0.49%</td>
+              <td>523.9</td>
+              <td>211.44</td>
+            </tr>
+            <tr>
+              <td>2025-12-23</td>
+              <td style="color:#e53935">4.05</td>
+              <td style="color:#e53935">4.06</td>
+              <td style="color:#e53935">4.02</td>
+              <td style="color:#e53935">4.04</td>
+              <td style="color:#e53935">+0.00%</td>
+              <td>519.7</td>
+              <td>209.71</td>
+            </tr>
+            <tr>
+              <td>2025-12-22</td>
+              <td style="color:#43a047">4.09</td>
+              <td style="color:#43a047">4.10</td>
+              <td style="color:#43a047">4.03</td>
+              <td style="color:#43a047">4.04</td>
+              <td style="color:#43a047">-1.22%</td>
+              <td>690.8</td>
+              <td>280.31</td>
+            </tr>
+            <tr>
+              <td>2025-12-19</td>
+              <td style="color:#43a047">4.12</td>
+              <td style="color:#43a047">4.13</td>
+              <td style="color:#43a047">4.09</td>
+              <td style="color:#43a047">4.09</td>
+              <td style="color:#43a047">-0.49%</td>
+              <td>430.8</td>
+              <td>176.98</td>
+            </tr>
+            <tr>
+              <td>2025-12-18</td>
+              <td style="color:#43a047">4.15</td>
+              <td style="color:#43a047">4.16</td>
+              <td style="color:#43a047">4.07</td>
+              <td style="color:#43a047">4.11</td>
+              <td style="color:#43a047">-1.44%</td>
+              <td>622.4</td>
+              <td>255.49</td>
+            </tr>
+            <tr>
+              <td>2025-12-17</td>
+              <td style="color:#e53935">4.14</td>
+              <td style="color:#e53935">4.19</td>
+              <td style="color:#e53935">4.13</td>
+              <td style="color:#e53935">4.17</td>
+              <td style="color:#e53935">+0.72%</td>
+              <td>709.0</td>
+              <td>294.98</td>
+            </tr>
+            <tr>
+              <td>2025-12-16</td>
+              <td style="color:#e53935">4.14</td>
+              <td style="color:#e53935">4.18</td>
+              <td style="color:#e53935">4.11</td>
+              <td style="color:#e53935">4.14</td>
+              <td style="color:#e53935">+0.24%</td>
+              <td>769.4</td>
+              <td>319.13</td>
+            </tr>
+            <tr>
+              <td>2025-12-15</td>
+              <td style="color:#43a047">4.11</td>
+              <td style="color:#43a047">4.18</td>
+              <td style="color:#43a047">4.10</td>
+              <td style="color:#43a047">4.13</td>
+              <td style="color:#43a047">-0.24%</td>
+              <td>729.8</td>
+              <td>302.23</td>
+            </tr>
+            <tr>
+              <td>2025-12-12</td>
+              <td style="color:#e53935">4.12</td>
+              <td style="color:#e53935">4.16</td>
+              <td style="color:#e53935">4.09</td>
+              <td style="color:#e53935">4.14</td>
+              <td style="color:#e53935">+0.73%</td>
+              <td>700.1</td>
+              <td>289.12</td>
+            </tr>
+            <tr>
+              <td>2025-12-11</td>
+              <td style="color:#43a047">4.18</td>
+              <td style="color:#43a047">4.19</td>
+              <td style="color:#43a047">4.10</td>
+              <td style="color:#43a047">4.11</td>
+              <td style="color:#43a047">-1.67%</td>
+              <td>555.4</td>
+              <td>229.52</td>
+            </tr>
+            <tr>
+              <td>2025-12-10</td>
+              <td style="color:#e53935">4.17</td>
+              <td style="color:#e53935">4.24</td>
+              <td style="color:#e53935">4.15</td>
+              <td style="color:#e53935">4.18</td>
+              <td style="color:#e53935">+0.24%</td>
+              <td>694.6</td>
+              <td>290.18</td>
+            </tr>
+            <tr>
+              <td>2025-12-09</td>
+              <td style="color:#43a047">4.20</td>
+              <td style="color:#43a047">4.23</td>
+              <td style="color:#43a047">4.15</td>
+              <td style="color:#43a047">4.17</td>
+              <td style="color:#43a047">-0.95%</td>
+              <td>752.8</td>
+              <td>314.79</td>
+            </tr>
+            <tr>
+              <td>2025-12-08</td>
+              <td style="color:#43a047">4.26</td>
+              <td style="color:#43a047">4.35</td>
+              <td style="color:#43a047">4.20</td>
+              <td style="color:#43a047">4.21</td>
+              <td style="color:#43a047">-1.17%</td>
+              <td>1189.1</td>
+              <td>504.99</td>
+            </tr>
+            <tr>
+              <td>2025-12-05</td>
+              <td style="color:#e53935">4.05</td>
+              <td style="color:#e53935">4.26</td>
+              <td style="color:#e53935">4.04</td>
+              <td style="color:#e53935">4.26</td>
+              <td style="color:#e53935">+5.19%</td>
+              <td>1900.1</td>
+              <td>791.44</td>
+            </tr>
+            <tr>
+              <td>2025-12-04</td>
+              <td style="color:#e53935">4.02</td>
+              <td style="color:#e53935">4.08</td>
+              <td style="color:#e53935">4.01</td>
+              <td style="color:#e53935">4.05</td>
+              <td style="color:#e53935">+0.50%</td>
+              <td>794.8</td>
+              <td>321.94</td>
+            </tr>
+            <tr>
+              <td>2025-12-03</td>
+              <td style="color:#e53935">3.89</td>
+              <td style="color:#e53935">4.08</td>
+              <td style="color:#e53935">3.88</td>
+              <td style="color:#e53935">4.03</td>
+              <td style="color:#e53935">+3.87%</td>
+              <td>1300.7</td>
+              <td>520.44</td>
+            </tr>
+            <tr>
+              <td>2025-12-02</td>
+              <td style="color:#43a047">3.90</td>
+              <td style="color:#43a047">3.91</td>
+              <td style="color:#43a047">3.87</td>
+              <td style="color:#43a047">3.88</td>
+              <td style="color:#43a047">-0.51%</td>
+              <td>314.2</td>
+              <td>122.12</td>
+            </tr>
+            <tr>
+              <td>2025-12-01</td>
+              <td style="color:#e53935">3.86</td>
+              <td style="color:#e53935">3.91</td>
+              <td style="color:#e53935">3.85</td>
+              <td style="color:#e53935">3.90</td>
+              <td style="color:#e53935">+1.04%</td>
+              <td>365.5</td>
+              <td>141.90</td>
+            </tr>
+            <tr>
+              <td>2025-11-28</td>
+              <td style="color:#e53935">3.84</td>
+              <td style="color:#e53935">3.86</td>
+              <td style="color:#e53935">3.82</td>
+              <td style="color:#e53935">3.86</td>
+              <td style="color:#e53935">+0.52%</td>
+              <td>235.3</td>
+              <td>90.43</td>
+            </tr>
+            <tr>
+              <td>2025-11-27</td>
+              <td style="color:#43a047">3.86</td>
+              <td style="color:#43a047">3.87</td>
+              <td style="color:#43a047">3.83</td>
+              <td style="color:#43a047">3.84</td>
+              <td style="color:#43a047">-0.52%</td>
+              <td>247.8</td>
+              <td>95.39</td>
+            </tr>
+            <tr>
+              <td>2025-11-26</td>
+              <td style="color:#e53935">3.86</td>
+              <td style="color:#e53935">3.88</td>
+              <td style="color:#e53935">3.85</td>
+              <td style="color:#e53935">3.86</td>
+              <td style="color:#e53935">+0.26%</td>
+              <td>276.6</td>
+              <td>106.85</td>
+            </tr>
+            <tr>
+              <td>2025-11-25</td>
+              <td style="color:#e53935">3.83</td>
+              <td style="color:#e53935">3.87</td>
+              <td style="color:#e53935">3.82</td>
+              <td style="color:#e53935">3.85</td>
+              <td style="color:#e53935">+0.79%</td>
+              <td>357.6</td>
+              <td>137.90</td>
+            </tr>
+            <tr>
+              <td>2025-11-24</td>
+              <td style="color:#43a047">3.84</td>
+              <td style="color:#43a047">3.85</td>
+              <td style="color:#43a047">3.79</td>
+              <td style="color:#43a047">3.82</td>
+              <td style="color:#43a047">-0.26%</td>
+              <td>475.3</td>
+              <td>181.56</td>
+            </tr>
+            <tr>
+              <td>2025-11-21</td>
+              <td style="color:#43a047">3.88</td>
+              <td style="color:#43a047">3.89</td>
+              <td style="color:#43a047">3.82</td>
+              <td style="color:#43a047">3.83</td>
+              <td style="color:#43a047">-1.79%</td>
+              <td>525.7</td>
+              <td>202.72</td>
+            </tr>
+            <tr>
+              <td>2025-11-20</td>
+              <td style="color:#43a047">3.92</td>
+              <td style="color:#43a047">3.94</td>
+              <td style="color:#43a047">3.90</td>
+              <td style="color:#43a047">3.90</td>
+              <td style="color:#43a047">-0.51%</td>
+              <td>354.3</td>
+              <td>138.86</td>
+            </tr>
+            <tr>
+              <td>2025-11-19</td>
+              <td style="color:#43a047">3.92</td>
+              <td style="color:#43a047">3.94</td>
+              <td style="color:#43a047">3.88</td>
+              <td style="color:#43a047">3.92</td>
+              <td style="color:#43a047">-0.25%</td>
+              <td>443.3</td>
+              <td>173.17</td>
+            </tr>
+            <tr>
+              <td>2025-11-18</td>
+              <td style="color:#43a047">3.96</td>
+              <td style="color:#43a047">3.97</td>
+              <td style="color:#43a047">3.92</td>
+              <td style="color:#43a047">3.93</td>
+              <td style="color:#43a047">-0.76%</td>
+              <td>418.8</td>
+              <td>164.93</td>
+            </tr>
+            <tr>
+              <td>2025-11-17</td>
+              <td style="color:#43a047">3.99</td>
+              <td style="color:#43a047">4.00</td>
+              <td style="color:#43a047">3.96</td>
+              <td style="color:#43a047">3.96</td>
+              <td style="color:#43a047">-1.00%</td>
+              <td>411.9</td>
+              <td>163.75</td>
+            </tr>
+            <tr>
+              <td>2025-11-14</td>
+              <td style="color:#43a047">4.02</td>
+              <td style="color:#43a047">4.03</td>
+              <td style="color:#43a047">3.99</td>
+              <td style="color:#43a047">4.00</td>
+              <td style="color:#43a047">-0.99%</td>
+              <td>393.7</td>
+              <td>157.93</td>
+            </tr>
+            <tr>
+              <td>2025-11-13</td>
+              <td style="color:#e53935">4.03</td>
+              <td style="color:#e53935">4.05</td>
+              <td style="color:#e53935">4.02</td>
+              <td style="color:#e53935">4.04</td>
+              <td style="color:#e53935">+0.00%</td>
+              <td>384.0</td>
+              <td>154.89</td>
+            </tr>
+            <tr>
+              <td>2025-11-12</td>
+              <td style="color:#e53935">4.04</td>
+              <td style="color:#e53935">4.06</td>
+              <td style="color:#e53935">4.01</td>
+              <td style="color:#e53935">4.04</td>
+              <td style="color:#e53935">+0.00%</td>
+              <td>489.1</td>
+              <td>197.28</td>
+            </tr>
+            <tr>
+              <td>2025-11-11</td>
+              <td style="color:#43a047">4.07</td>
+              <td style="color:#43a047">4.07</td>
+              <td style="color:#43a047">4.03</td>
+              <td style="color:#43a047">4.04</td>
+              <td style="color:#43a047">-0.49%</td>
+              <td>350.8</td>
+              <td>141.96</td>
+            </tr>
+            <tr>
+              <td>2025-11-10</td>
+              <td style="color:#e53935">4.01</td>
+              <td style="color:#e53935">4.07</td>
+              <td style="color:#e53935">3.99</td>
+              <td style="color:#e53935">4.06</td>
+              <td style="color:#e53935">+1.25%</td>
+              <td>571.5</td>
+              <td>230.64</td>
+            </tr>
+            <tr>
+              <td>2025-11-07</td>
+              <td style="color:#e53935">4.00</td>
+              <td style="color:#e53935">4.02</td>
+              <td style="color:#e53935">3.98</td>
+              <td style="color:#e53935">4.01</td>
+              <td style="color:#e53935">+0.25%</td>
+              <td>304.3</td>
+              <td>121.82</td>
+            </tr>
+            <tr>
+              <td>2025-11-06</td>
+              <td style="color:#e53935">4.00</td>
+              <td style="color:#e53935">4.02</td>
+              <td style="color:#e53935">3.99</td>
+              <td style="color:#e53935">4.00</td>
+              <td style="color:#e53935">+0.00%</td>
+              <td>314.6</td>
+              <td>125.96</td>
+            </tr>
+            <tr>
+              <td>2025-11-05</td>
+              <td style="color:#e53935">3.99</td>
+              <td style="color:#e53935">4.02</td>
+              <td style="color:#e53935">3.96</td>
+              <td style="color:#e53935">4.00</td>
+              <td style="color:#e53935">+0.00%</td>
+              <td>412.5</td>
+              <td>164.56</td>
+            </tr>
+            <tr>
+              <td>2025-11-04</td>
+              <td style="color:#43a047">4.05</td>
+              <td style="color:#43a047">4.06</td>
+              <td style="color:#43a047">4.00</td>
+              <td style="color:#43a047">4.00</td>
+              <td style="color:#43a047">-1.48%</td>
+              <td>498.4</td>
+              <td>200.36</td>
+            </tr>
+            <tr>
+              <td>2025-11-03</td>
+              <td style="color:#e53935">4.06</td>
+              <td style="color:#e53935">4.07</td>
+              <td style="color:#e53935">4.03</td>
+              <td style="color:#e53935">4.06</td>
+              <td style="color:#e53935">+0.00%</td>
+              <td>377.9</td>
+              <td>152.80</td>
+            </tr>
+            <tr>
+              <td>2025-10-31</td>
+              <td style="color:#43a047">4.10</td>
+              <td style="color:#43a047">4.12</td>
+              <td style="color:#43a047">4.05</td>
+              <td style="color:#43a047">4.06</td>
+              <td style="color:#43a047">-0.73%</td>
+              <td>540.6</td>
+              <td>220.53</td>
+            </tr>
+            <tr>
+              <td>2025-10-30</td>
+              <td style="color:#e53935">4.07</td>
+              <td style="color:#e53935">4.14</td>
+              <td style="color:#e53935">4.06</td>
+              <td style="color:#e53935">4.09</td>
+              <td style="color:#e53935">+0.49%</td>
+              <td>631.4</td>
+              <td>258.80</td>
+            </tr>
+            <tr>
+              <td>2025-10-29</td>
+              <td style="color:#e53935">4.05</td>
+              <td style="color:#e53935">4.08</td>
+              <td style="color:#e53935">4.04</td>
+              <td style="color:#e53935">4.07</td>
+              <td style="color:#e53935">+0.25%</td>
+              <td>351.9</td>
+              <td>142.87</td>
+            </tr>
+            <tr>
+              <td>2025-10-28</td>
+              <td style="color:#43a047">4.06</td>
+              <td style="color:#43a047">4.07</td>
+              <td style="color:#43a047">4.04</td>
+              <td style="color:#43a047">4.06</td>
+              <td style="color:#43a047">-0.25%</td>
+              <td>341.0</td>
+              <td>138.31</td>
+            </tr>
+            <tr>
+              <td>2025-10-27</td>
+              <td style="color:#e53935">4.07</td>
+              <td style="color:#e53935">4.08</td>
+              <td style="color:#e53935">4.05</td>
+              <td style="color:#e53935">4.07</td>
+              <td style="color:#e53935">+0.49%</td>
+              <td>388.8</td>
+              <td>158.07</td>
+            </tr>
+            <tr>
+              <td>2025-10-24</td>
+              <td style="color:#e53935">4.05</td>
+              <td style="color:#e53935">4.07</td>
+              <td style="color:#e53935">4.03</td>
+              <td style="color:#e53935">4.05</td>
+              <td style="color:#e53935">+0.00%</td>
+              <td>271.2</td>
+              <td>109.83</td>
+            </tr>
+            <tr>
+              <td>2025-10-23</td>
+              <td style="color:#e53935">4.02</td>
+              <td style="color:#e53935">4.05</td>
+              <td style="color:#e53935">4.00</td>
+              <td style="color:#e53935">4.05</td>
+              <td style="color:#e53935">+0.75%</td>
+              <td>339.8</td>
+              <td>136.87</td>
+            </tr>
+            <tr>
+              <td>2025-10-22</td>
+              <td style="color:#e53935">4.02</td>
+              <td style="color:#e53935">4.04</td>
+              <td style="color:#e53935">4.01</td>
+              <td style="color:#e53935">4.02</td>
+              <td style="color:#e53935">+0.00%</td>
+              <td>241.5</td>
+              <td>97.22</td>
+            </tr>
+            <tr>
+              <td>2025-10-21</td>
+              <td style="color:#e53935">4.01</td>
+              <td style="color:#e53935">4.04</td>
+              <td style="color:#e53935">4.00</td>
+              <td style="color:#e53935">4.02</td>
+              <td style="color:#e53935">+0.50%</td>
+              <td>349.6</td>
+              <td>140.76</td>
+            </tr>
+            <tr>
+              <td>2025-10-20</td>
+              <td style="color:#e53935">4.03</td>
+              <td style="color:#e53935">4.04</td>
+              <td style="color:#e53935">3.99</td>
+              <td style="color:#e53935">4.00</td>
+              <td style="color:#e53935">+0.00%</td>
+              <td>415.3</td>
+              <td>166.57</td>
+            </tr>
+            <tr>
+              <td>2025-10-17</td>
+              <td style="color:#43a047">4.07</td>
+              <td style="color:#43a047">4.09</td>
+              <td style="color:#43a047">4.00</td>
+              <td style="color:#43a047">4.00</td>
+              <td style="color:#43a047">-1.96%</td>
+              <td>653.8</td>
+              <td>263.86</td>
+            </tr>
+            <tr>
+              <td>2025-10-16</td>
+              <td style="color:#43a047">4.10</td>
+              <td style="color:#43a047">4.11</td>
+              <td style="color:#43a047">4.06</td>
+              <td style="color:#43a047">4.08</td>
+              <td style="color:#43a047">-0.49%</td>
+              <td>403.7</td>
+              <td>164.83</td>
+            </tr>
+            <tr>
+              <td>2025-10-15</td>
+              <td style="color:#e53935">4.07</td>
+              <td style="color:#e53935">4.12</td>
+              <td style="color:#e53935">4.05</td>
+              <td style="color:#e53935">4.10</td>
+              <td style="color:#e53935">+0.99%</td>
+              <td>568.2</td>
+              <td>232.11</td>
+            </tr>
+            <tr>
+              <td>2025-10-14</td>
+              <td style="color:#43a047">4.12</td>
+              <td style="color:#43a047">4.15</td>
+              <td style="color:#43a047">4.05</td>
+              <td style="color:#43a047">4.06</td>
+              <td style="color:#43a047">-1.22%</td>
+              <td>842.9</td>
+              <td>345.44</td>
+            </tr>
+            <tr>
+              <td>2025-10-13</td>
+              <td style="color:#43a047">4.08</td>
+              <td style="color:#43a047">4.12</td>
+              <td style="color:#43a047">4.04</td>
+              <td style="color:#43a047">4.11</td>
+              <td style="color:#43a047">-1.44%</td>
+              <td>1063.5</td>
+              <td>432.90</td>
+            </tr>
+            <tr>
+              <td>2025-10-10</td>
+              <td style="color:#43a047">4.26</td>
+              <td style="color:#43a047">4.27</td>
+              <td style="color:#43a047">4.16</td>
+              <td style="color:#43a047">4.17</td>
+              <td style="color:#43a047">-2.57%</td>
+              <td>870.4</td>
+              <td>365.44</td>
+            </tr>
+            <tr>
+              <td>2025-10-09</td>
+              <td style="color:#e53935">4.17</td>
+              <td style="color:#e53935">4.34</td>
+              <td style="color:#e53935">4.17</td>
+              <td style="color:#e53935">4.28</td>
+              <td style="color:#e53935">+2.88%</td>
+              <td>1195.4</td>
+              <td>510.34</td>
+            </tr>
+            <tr>
+              <td>2025-09-30</td>
+              <td style="color:#e53935">4.11</td>
+              <td style="color:#e53935">4.17</td>
+              <td style="color:#e53935">4.11</td>
+              <td style="color:#e53935">4.16</td>
+              <td style="color:#e53935">+0.97%</td>
+              <td>694.2</td>
+              <td>288.10</td>
+            </tr>
+            <tr>
+              <td>2025-09-29</td>
+              <td style="color:#e53935">4.10</td>
+              <td style="color:#e53935">4.13</td>
+              <td style="color:#e53935">4.04</td>
+              <td style="color:#e53935">4.12</td>
+              <td style="color:#e53935">+0.49%</td>
+              <td>731.3</td>
+              <td>298.46</td>
+            </tr>
+            <tr>
+              <td>2025-09-26</td>
+              <td style="color:#43a047">4.16</td>
+              <td style="color:#43a047">4.17</td>
+              <td style="color:#43a047">4.10</td>
+              <td style="color:#43a047">4.10</td>
+              <td style="color:#43a047">-1.68%</td>
+              <td>709.1</td>
+              <td>292.36</td>
+            </tr>
+            <tr>
+              <td>2025-09-25</td>
+              <td style="color:#43a047">4.20</td>
+              <td style="color:#43a047">4.21</td>
+              <td style="color:#43a047">4.15</td>
+              <td style="color:#43a047">4.17</td>
+              <td style="color:#43a047">-0.95%</td>
+              <td>655.0</td>
+              <td>273.53</td>
+            </tr>
+            <tr>
+              <td>2025-09-24</td>
+              <td style="color:#e53935">4.14</td>
+              <td style="color:#e53935">4.22</td>
+              <td style="color:#e53935">4.11</td>
+              <td style="color:#e53935">4.21</td>
+              <td style="color:#e53935">+1.20%</td>
+              <td>948.6</td>
+              <td>397.46</td>
+            </tr>
+            <tr>
+              <td>2025-09-23</td>
+              <td style="color:#e53935">4.15</td>
+              <td style="color:#e53935">4.18</td>
+              <td style="color:#e53935">4.05</td>
+              <td style="color:#e53935">4.16</td>
+              <td style="color:#e53935">+0.48%</td>
+              <td>713.0</td>
+              <td>293.27</td>
+            </tr>
+            <tr>
+              <td>2025-09-22</td>
+              <td style="color:#e53935">4.13</td>
+              <td style="color:#e53935">4.18</td>
+              <td style="color:#e53935">4.08</td>
+              <td style="color:#e53935">4.14</td>
+              <td style="color:#e53935">+0.24%</td>
+              <td>503.8</td>
+              <td>207.96</td>
+            </tr>
+            <tr>
+              <td>2025-09-19</td>
+              <td style="color:#43a047">4.12</td>
+              <td style="color:#43a047">4.18</td>
+              <td style="color:#43a047">4.12</td>
+              <td style="color:#43a047">4.13</td>
+              <td style="color:#43a047">-0.24%</td>
+              <td>553.5</td>
+              <td>229.98</td>
+            </tr>
+            <tr>
+              <td>2025-09-18</td>
+              <td style="color:#43a047">4.16</td>
+              <td style="color:#43a047">4.22</td>
+              <td style="color:#43a047">4.10</td>
+              <td style="color:#43a047">4.14</td>
+              <td style="color:#43a047">-0.48%</td>
+              <td>842.7</td>
+              <td>351.44</td>
+            </tr>
+            <tr>
+              <td>2025-09-17</td>
+              <td style="color:#e53935">4.13</td>
+              <td style="color:#e53935">4.18</td>
+              <td style="color:#e53935">4.10</td>
+              <td style="color:#e53935">4.16</td>
+              <td style="color:#e53935">+0.73%</td>
+              <td>527.5</td>
+              <td>218.91</td>
+            </tr>
+            <tr>
+              <td>2025-09-16</td>
+              <td style="color:#43a047">4.17</td>
+              <td style="color:#43a047">4.18</td>
+              <td style="color:#43a047">4.10</td>
+              <td style="color:#43a047">4.13</td>
+              <td style="color:#43a047">-0.72%</td>
+              <td>509.9</td>
+              <td>210.33</td>
+            </tr>
+            <tr>
+              <td>2025-09-15</td>
+              <td style="color:#43a047">4.17</td>
+              <td style="color:#43a047">4.25</td>
+              <td style="color:#43a047">4.15</td>
+              <td style="color:#43a047">4.16</td>
+              <td style="color:#43a047">-0.24%</td>
+              <td>578.8</td>
+              <td>242.43</td>
+            </tr>
+            <tr>
+              <td>2025-09-12</td>
+              <td style="color:#e53935">4.19</td>
+              <td style="color:#e53935">4.20</td>
+              <td style="color:#e53935">4.15</td>
+              <td style="color:#e53935">4.17</td>
+              <td style="color:#e53935">+0.24%</td>
+              <td>595.4</td>
+              <td>248.40</td>
+            </tr>
+            <tr>
+              <td>2025-09-11</td>
+              <td style="color:#e53935">4.08</td>
+              <td style="color:#e53935">4.16</td>
+              <td style="color:#e53935">4.06</td>
+              <td style="color:#e53935">4.16</td>
+              <td style="color:#e53935">+1.96%</td>
+              <td>705.2</td>
+              <td>290.84</td>
+            </tr>
+            <tr>
+              <td>2025-09-10</td>
+              <td style="color:#43a047">4.10</td>
+              <td style="color:#43a047">4.10</td>
+              <td style="color:#43a047">4.06</td>
+              <td style="color:#43a047">4.08</td>
+              <td style="color:#43a047">-0.49%</td>
+              <td>364.5</td>
+              <td>148.74</td>
+            </tr>
+            <tr>
+              <td>2025-09-09</td>
+              <td style="color:#43a047">4.12</td>
+              <td style="color:#43a047">4.13</td>
+              <td style="color:#43a047">4.06</td>
+              <td style="color:#43a047">4.10</td>
+              <td style="color:#43a047">-0.73%</td>
+              <td>461.2</td>
+              <td>188.72</td>
+            </tr>
+            <tr>
+              <td>2025-09-08</td>
+              <td style="color:#e53935">4.11</td>
+              <td style="color:#e53935">4.17</td>
+              <td style="color:#e53935">4.07</td>
+              <td style="color:#e53935">4.13</td>
+              <td style="color:#e53935">+0.49%</td>
+              <td>571.4</td>
+              <td>235.11</td>
+            </tr>
+            <tr>
+              <td>2025-09-05</td>
+              <td style="color:#e53935">4.07</td>
+              <td style="color:#e53935">4.11</td>
+              <td style="color:#e53935">4.03</td>
+              <td style="color:#e53935">4.11</td>
+              <td style="color:#e53935">+1.48%</td>
+              <td>626.6</td>
+              <td>255.16</td>
+            </tr>
+            <tr>
+              <td>2025-09-04</td>
+              <td style="color:#e53935">4.05</td>
+              <td style="color:#e53935">4.15</td>
+              <td style="color:#e53935">4.01</td>
+              <td style="color:#e53935">4.05</td>
+              <td style="color:#e53935">+0.25%</td>
+              <td>910.5</td>
+              <td>370.65</td>
+            </tr>
+            <tr>
+              <td>2025-09-03</td>
+              <td style="color:#43a047">4.12</td>
+              <td style="color:#43a047">4.12</td>
+              <td style="color:#43a047">4.02</td>
+              <td style="color:#43a047">4.04</td>
+              <td style="color:#43a047">-1.70%</td>
+              <td>574.6</td>
+              <td>233.48</td>
+            </tr>
+            <tr>
+              <td>2025-09-02</td>
+              <td style="color:#43a047">4.19</td>
+              <td style="color:#43a047">4.19</td>
+              <td style="color:#43a047">4.08</td>
+              <td style="color:#43a047">4.11</td>
+              <td style="color:#43a047">-2.14%</td>
+              <td>770.8</td>
+              <td>318.32</td>
+            </tr>
+            <tr>
+              <td>2025-09-01</td>
+              <td style="color:#43a047">4.24</td>
+              <td style="color:#43a047">4.25</td>
+              <td style="color:#43a047">4.16</td>
+              <td style="color:#43a047">4.20</td>
+              <td style="color:#43a047">-0.71%</td>
+              <td>721.3</td>
+              <td>302.11</td>
+            </tr>
+            <tr>
+              <td>2025-08-29</td>
+              <td style="color:#e53935">4.20</td>
+              <td style="color:#e53935">4.26</td>
+              <td style="color:#e53935">4.18</td>
+              <td style="color:#e53935">4.23</td>
+              <td style="color:#e53935">+0.48%</td>
+              <td>946.0</td>
+              <td>399.30</td>
+            </tr>
+            <tr>
+              <td>2025-08-28</td>
+              <td style="color:#e53935">4.15</td>
+              <td style="color:#e53935">4.21</td>
+              <td style="color:#e53935">4.10</td>
+              <td style="color:#e53935">4.21</td>
+              <td style="color:#e53935">+1.94%</td>
+              <td>941.8</td>
+              <td>392.00</td>
+            </tr>
+            <tr>
+              <td>2025-08-27</td>
+              <td style="color:#43a047">4.16</td>
+              <td style="color:#43a047">4.27</td>
+              <td style="color:#43a047">4.12</td>
+              <td style="color:#43a047">4.13</td>
+              <td style="color:#43a047">-1.20%</td>
+              <td>1088.1</td>
+              <td>456.75</td>
+            </tr>
+            <tr>
+              <td>2025-08-26</td>
+              <td style="color:#e53935">4.15</td>
+              <td style="color:#e53935">4.21</td>
+              <td style="color:#e53935">4.13</td>
+              <td style="color:#e53935">4.18</td>
+              <td style="color:#e53935">+0.48%</td>
+              <td>876.5</td>
+              <td>365.44</td>
+            </tr>
+            <tr>
+              <td>2025-08-25</td>
+              <td style="color:#43a047">4.21</td>
+              <td style="color:#43a047">4.23</td>
+              <td style="color:#43a047">4.11</td>
+              <td style="color:#43a047">4.16</td>
+              <td style="color:#43a047">-0.48%</td>
+              <td>986.5</td>
+              <td>409.52</td>
+            </tr>
+            <tr>
+              <td>2025-08-22</td>
+              <td style="color:#e53935">4.04</td>
+              <td style="color:#e53935">4.20</td>
+              <td style="color:#e53935">4.03</td>
+              <td style="color:#e53935">4.18</td>
+              <td style="color:#e53935">+3.47%</td>
+              <td>1298.2</td>
+              <td>534.52</td>
+            </tr>
+            <tr>
+              <td>2025-08-21</td>
+              <td style="color:#e53935">4.01</td>
+              <td style="color:#e53935">4.08</td>
+              <td style="color:#e53935">4.00</td>
+              <td style="color:#e53935">4.04</td>
+              <td style="color:#e53935">+0.75%</td>
+              <td>806.7</td>
+              <td>325.79</td>
+            </tr>
+            <tr>
+              <td>2025-08-20</td>
+              <td style="color:#e53935">3.92</td>
+              <td style="color:#e53935">4.01</td>
+              <td style="color:#e53935">3.90</td>
+              <td style="color:#e53935">4.01</td>
+              <td style="color:#e53935">+2.04%</td>
+              <td>722.2</td>
+              <td>286.10</td>
+            </tr>
+            <tr>
+              <td>2025-08-19</td>
+              <td style="color:#43a047">3.95</td>
+              <td style="color:#43a047">3.96</td>
+              <td style="color:#43a047">3.92</td>
+              <td style="color:#43a047">3.93</td>
+              <td style="color:#43a047">-0.51%</td>
+              <td>459.9</td>
+              <td>181.12</td>
+            </tr>
+            <tr>
+              <td>2025-08-18</td>
+              <td style="color:#43a047">3.96</td>
+              <td style="color:#43a047">3.99</td>
+              <td style="color:#43a047">3.94</td>
+              <td style="color:#43a047">3.95</td>
+              <td style="color:#43a047">-0.25%</td>
+              <td>635.7</td>
+              <td>252.04</td>
+            </tr>
+            <tr>
+              <td>2025-08-15</td>
+              <td style="color:#e53935">3.89</td>
+              <td style="color:#e53935">3.96</td>
+              <td style="color:#e53935">3.88</td>
+              <td style="color:#e53935">3.96</td>
+              <td style="color:#e53935">+1.54%</td>
+              <td>565.2</td>
+              <td>221.90</td>
+            </tr>
+            <tr>
+              <td>2025-08-14</td>
+              <td style="color:#43a047">3.98</td>
+              <td style="color:#43a047">3.99</td>
+              <td style="color:#43a047">3.90</td>
+              <td style="color:#43a047">3.90</td>
+              <td style="color:#43a047">-2.01%</td>
+              <td>858.0</td>
+              <td>338.19</td>
+            </tr>
+            <tr>
+              <td>2025-08-13</td>
+              <td style="color:#43a047">3.99</td>
+              <td style="color:#43a047">4.00</td>
+              <td style="color:#43a047">3.98</td>
+              <td style="color:#43a047">3.98</td>
+              <td style="color:#43a047">-0.25%</td>
+              <td>387.0</td>
+              <td>154.38</td>
+            </tr>
+            <tr>
+              <td>2025-08-12</td>
+              <td style="color:#43a047">4.01</td>
+              <td style="color:#43a047">4.02</td>
+              <td style="color:#43a047">3.98</td>
+              <td style="color:#43a047">3.99</td>
+              <td style="color:#43a047">-0.50%</td>
+              <td>382.2</td>
+              <td>152.57</td>
+            </tr>
+            <tr>
+              <td>2025-08-11</td>
+              <td style="color:#e53935">4.01</td>
+              <td style="color:#e53935">4.03</td>
+              <td style="color:#e53935">3.99</td>
+              <td style="color:#e53935">4.01</td>
+              <td style="color:#e53935">+0.25%</td>
+              <td>415.2</td>
+              <td>166.35</td>
+            </tr>
+            <tr>
+              <td>2025-08-08</td>
+              <td style="color:#43a047">4.03</td>
+              <td style="color:#43a047">4.04</td>
+              <td style="color:#43a047">4.00</td>
+              <td style="color:#43a047">4.00</td>
+              <td style="color:#43a047">-0.74%</td>
+              <td>314.2</td>
+              <td>126.27</td>
+            </tr>
+            <tr>
+              <td>2025-08-07</td>
+              <td style="color:#43a047">4.06</td>
+              <td style="color:#43a047">4.07</td>
+              <td style="color:#43a047">4.02</td>
+              <td style="color:#43a047">4.03</td>
+              <td style="color:#43a047">-0.74%</td>
+              <td>290.5</td>
+              <td>117.37</td>
+            </tr>
+            <tr>
+              <td>2025-08-06</td>
+              <td style="color:#e53935">4.06</td>
+              <td style="color:#e53935">4.06</td>
+              <td style="color:#e53935">4.03</td>
+              <td style="color:#e53935">4.06</td>
+              <td style="color:#e53935">+0.49%</td>
+              <td>243.9</td>
+              <td>98.69</td>
+            </tr>
+            <tr>
+              <td>2025-08-05</td>
+              <td style="color:#e53935">4.02</td>
+              <td style="color:#e53935">4.08</td>
+              <td style="color:#e53935">4.01</td>
+              <td style="color:#e53935">4.04</td>
+              <td style="color:#e53935">+0.50%</td>
+              <td>343.6</td>
+              <td>139.27</td>
+            </tr>
+            <tr>
+              <td>2025-08-04</td>
+              <td style="color:#43a047">4.03</td>
+              <td style="color:#43a047">4.04</td>
+              <td style="color:#43a047">3.99</td>
+              <td style="color:#43a047">4.02</td>
+              <td style="color:#43a047">-0.25%</td>
+              <td>310.2</td>
+              <td>124.43</td>
+            </tr>
+            <tr>
+              <td>2025-08-01</td>
+              <td style="color:#43a047">4.03</td>
+              <td style="color:#43a047">4.08</td>
+              <td style="color:#43a047">4.02</td>
+              <td style="color:#43a047">4.03</td>
+              <td style="color:#43a047">-0.25%</td>
+              <td>335.7</td>
+              <td>135.91</td>
+            </tr>
+            <tr>
+              <td>2025-07-31</td>
+              <td style="color:#43a047">4.08</td>
+              <td style="color:#43a047">4.09</td>
+              <td style="color:#43a047">4.02</td>
+              <td style="color:#43a047">4.04</td>
+              <td style="color:#43a047">-0.98%</td>
+              <td>434.0</td>
+              <td>175.99</td>
+            </tr>
+            <tr>
+              <td>2025-07-30</td>
+              <td style="color:#43a047">4.10</td>
+              <td style="color:#43a047">4.12</td>
+              <td style="color:#43a047">4.06</td>
+              <td style="color:#43a047">4.08</td>
+              <td style="color:#43a047">-0.73%</td>
+              <td>317.9</td>
+              <td>130.17</td>
+            </tr>
+            <tr>
+              <td>2025-07-29</td>
+              <td style="color:#e53935">4.09</td>
+              <td style="color:#e53935">4.12</td>
+              <td style="color:#e53935">4.06</td>
+              <td style="color:#e53935">4.11</td>
+              <td style="color:#e53935">+0.24%</td>
+              <td>342.5</td>
+              <td>139.89</td>
+            </tr>
+            <tr>
+              <td>2025-07-28</td>
+              <td style="color:#e53935">4.11</td>
+              <td style="color:#e53935">4.11</td>
+              <td style="color:#e53935">4.08</td>
+              <td style="color:#e53935">4.10</td>
+              <td style="color:#e53935">+0.00%</td>
+              <td>253.1</td>
+              <td>103.69</td>
+            </tr>
+            <tr>
+              <td>2025-07-25</td>
+              <td style="color:#43a047">4.13</td>
+              <td style="color:#43a047">4.13</td>
+              <td style="color:#43a047">4.09</td>
+              <td style="color:#43a047">4.10</td>
+              <td style="color:#43a047">-0.73%</td>
+              <td>277.1</td>
+              <td>113.77</td>
+            </tr>
+            <tr>
+              <td>2025-07-24</td>
+              <td style="color:#e53935">4.10</td>
+              <td style="color:#e53935">4.13</td>
+              <td style="color:#e53935">4.10</td>
+              <td style="color:#e53935">4.13</td>
+              <td style="color:#e53935">+0.73%</td>
+              <td>335.4</td>
+              <td>138.15</td>
+            </tr>
+            <tr>
+              <td>2025-07-23</td>
+              <td style="color:#43a047">4.11</td>
+              <td style="color:#43a047">4.14</td>
+              <td style="color:#43a047">4.09</td>
+              <td style="color:#43a047">4.10</td>
+              <td style="color:#43a047">-0.24%</td>
+              <td>428.2</td>
+              <td>176.07</td>
+            </tr>
+            <tr>
+              <td>2025-07-22</td>
+              <td style="color:#e53935">4.06</td>
+              <td style="color:#e53935">4.11</td>
+              <td style="color:#e53935">4.04</td>
+              <td style="color:#e53935">4.11</td>
+              <td style="color:#e53935">+0.98%</td>
+              <td>457.2</td>
+              <td>186.52</td>
+            </tr>
+            <tr>
+              <td>2025-07-21</td>
+              <td style="color:#e53935">3.99</td>
+              <td style="color:#e53935">4.10</td>
+              <td style="color:#e53935">3.98</td>
+              <td style="color:#e53935">4.07</td>
+              <td style="color:#e53935">+2.00%</td>
+              <td>540.4</td>
+              <td>218.45</td>
+            </tr>
+            <tr>
+              <td>2025-07-18</td>
+              <td style="color:#43a047">4.04</td>
+              <td style="color:#43a047">4.05</td>
+              <td style="color:#43a047">3.97</td>
+              <td style="color:#43a047">3.99</td>
+              <td style="color:#43a047">-1.24%</td>
+              <td>351.7</td>
+              <td>140.59</td>
+            </tr>
+            <tr>
+              <td>2025-07-17</td>
+              <td style="color:#e53935">3.95</td>
+              <td style="color:#e53935">4.04</td>
+              <td style="color:#e53935">3.94</td>
+              <td style="color:#e53935">4.04</td>
+              <td style="color:#e53935">+2.28%</td>
+              <td>462.1</td>
+              <td>184.74</td>
+            </tr>
+            <tr>
+              <td>2025-07-16</td>
+              <td style="color:#43a047">3.97</td>
+              <td style="color:#43a047">3.98</td>
+              <td style="color:#43a047">3.94</td>
+              <td style="color:#43a047">3.95</td>
+              <td style="color:#43a047">-0.50%</td>
+              <td>306.2</td>
+              <td>121.07</td>
+            </tr>
+            <tr>
+              <td>2025-07-15</td>
+              <td style="color:#43a047">4.04</td>
+              <td style="color:#43a047">4.04</td>
+              <td style="color:#43a047">3.96</td>
+              <td style="color:#43a047">3.97</td>
+              <td style="color:#43a047">-1.98%</td>
+              <td>522.7</td>
+              <td>208.44</td>
+            </tr>
+            <tr>
+              <td>2025-07-14</td>
+              <td style="color:#43a047">4.05</td>
+              <td style="color:#43a047">4.07</td>
+              <td style="color:#43a047">4.04</td>
+              <td style="color:#43a047">4.05</td>
+              <td style="color:#43a047">-0.25%</td>
+              <td>353.8</td>
+              <td>143.45</td>
+            </tr>
+            <tr>
+              <td>2025-07-11</td>
+              <td style="color:#e53935">4.03</td>
+              <td style="color:#e53935">4.08</td>
+              <td style="color:#e53935">4.00</td>
+              <td style="color:#e53935">4.06</td>
+              <td style="color:#e53935">+0.74%</td>
+              <td>431.4</td>
+              <td>174.67</td>
+            </tr>
+            <tr>
+              <td>2025-07-10</td>
+              <td style="color:#e53935">3.98</td>
+              <td style="color:#e53935">4.06</td>
+              <td style="color:#e53935">3.98</td>
+              <td style="color:#e53935">4.03</td>
+              <td style="color:#e53935">+1.26%</td>
+              <td>535.5</td>
+              <td>215.48</td>
+            </tr>
+            <tr>
+              <td>2025-07-09</td>
+              <td style="color:#43a047">3.99</td>
+              <td style="color:#43a047">4.02</td>
+              <td style="color:#43a047">3.97</td>
+              <td style="color:#43a047">3.98</td>
+              <td style="color:#43a047">-0.50%</td>
+              <td>317.5</td>
+              <td>126.89</td>
+            </tr>
+            <tr>
+              <td>2025-07-08</td>
+              <td style="color:#e53935">3.96</td>
+              <td style="color:#e53935">4.00</td>
+              <td style="color:#e53935">3.95</td>
+              <td style="color:#e53935">4.00</td>
+              <td style="color:#e53935">+1.01%</td>
+              <td>249.2</td>
+              <td>99.14</td>
+            </tr>
+            <tr>
+              <td>2025-07-07</td>
+              <td style="color:#43a047">3.99</td>
+              <td style="color:#43a047">4.00</td>
+              <td style="color:#43a047">3.95</td>
+              <td style="color:#43a047">3.96</td>
+              <td style="color:#43a047">-1.00%</td>
+              <td>271.9</td>
+              <td>107.76</td>
+            </tr>
+            <tr>
+              <td>2025-07-04</td>
+              <td style="color:#43a047">4.02</td>
+              <td style="color:#43a047">4.03</td>
+              <td style="color:#43a047">3.99</td>
+              <td style="color:#43a047">4.00</td>
+              <td style="color:#43a047">-0.50%</td>
+              <td>293.3</td>
+              <td>117.60</td>
+            </tr>
+            <tr>
+              <td>2025-07-03</td>
+              <td style="color:#e53935">3.99</td>
+              <td style="color:#e53935">4.03</td>
+              <td style="color:#e53935">3.98</td>
+              <td style="color:#e53935">4.02</td>
+              <td style="color:#e53935">+1.00%</td>
+              <td>345.3</td>
+              <td>138.27</td>
+            </tr>
+            <tr>
+              <td>2025-07-02</td>
+              <td style="color:#43a047">3.99</td>
+              <td style="color:#43a047">3.99</td>
+              <td style="color:#43a047">3.97</td>
+              <td style="color:#43a047">3.98</td>
+              <td style="color:#43a047">-0.25%</td>
+              <td>200.9</td>
+              <td>79.90</td>
+            </tr>
+            <tr>
+              <td>2025-07-01</td>
+              <td style="color:#e53935">4.00</td>
+              <td style="color:#e53935">4.01</td>
+              <td style="color:#e53935">3.97</td>
+              <td style="color:#e53935">3.99</td>
+              <td style="color:#e53935">+0.00%</td>
+              <td>219.9</td>
+              <td>87.62</td>
+            </tr>
+            <tr>
+              <td>2025-06-30</td>
+              <td style="color:#e53935">3.98</td>
+              <td style="color:#e53935">4.02</td>
+              <td style="color:#e53935">3.98</td>
+              <td style="color:#e53935">3.99</td>
+              <td style="color:#e53935">+0.50%</td>
+              <td>269.1</td>
+              <td>107.58</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  
+  <div class="footer">
+    数据来源：<a href="https://tushare.pro" target="_blank">Tushare Pro</a> | 
+    京东方A (000725.SZ) | 仅作展示，不构成投资建议
+  </div>
+</div>
+
+<script>
+const dates = ["2025-06-30", "2025-07-01", "2025-07-02", "2025-07-03", "2025-07-04", "2025-07-07", "2025-07-08", "2025-07-09", "2025-07-10", "2025-07-11", "2025-07-14", "2025-07-15", "2025-07-16", "2025-07-17", "2025-07-18", "2025-07-21", "2025-07-22", "2025-07-23", "2025-07-24", "2025-07-25", "2025-07-28", "2025-07-29", "2025-07-30", "2025-07-31", "2025-08-01", "2025-08-04", "2025-08-05", "2025-08-06", "2025-08-07", "2025-08-08", "2025-08-11", "2025-08-12", "2025-08-13", "2025-08-14", "2025-08-15", "2025-08-18", "2025-08-19", "2025-08-20", "2025-08-21", "2025-08-22", "2025-08-25", "2025-08-26", "2025-08-27", "2025-08-28", "2025-08-29", "2025-09-01", "2025-09-02", "2025-09-03", "2025-09-04", "2025-09-05", "2025-09-08", "2025-09-09", "2025-09-10", "2025-09-11", "2025-09-12", "2025-09-15", "2025-09-16", "2025-09-17", "2025-09-18", "2025-09-19", "2025-09-22", "2025-09-23", "2025-09-24", "2025-09-25", "2025-09-26", "2025-09-29", "2025-09-30", "2025-10-09", "2025-10-10", "2025-10-13", "2025-10-14", "2025-10-15", "2025-10-16", "2025-10-17", "2025-10-20", "2025-10-21", "2025-10-22", "2025-10-23", "2025-10-24", "2025-10-27", "2025-10-28", "2025-10-29", "2025-10-30", "2025-10-31", "2025-11-03", "2025-11-04", "2025-11-05", "2025-11-06", "2025-11-07", "2025-11-10", "2025-11-11", "2025-11-12", "2025-11-13", "2025-11-14", "2025-11-17", "2025-11-18", "2025-11-19", "2025-11-20", "2025-11-21", "2025-11-24", "2025-11-25", "2025-11-26", "2025-11-27", "2025-11-28", "2025-12-01", "2025-12-02", "2025-12-03", "2025-12-04", "2025-12-05", "2025-12-08", "2025-12-09", "2025-12-10", "2025-12-11", "2025-12-12", "2025-12-15", "2025-12-16", "2025-12-17", "2025-12-18", "2025-12-19", "2025-12-22", "2025-12-23", "2025-12-24", "2025-12-25", "2025-12-26", "2025-12-29", "2025-12-30", "2025-12-31", "2026-01-05", "2026-01-06", "2026-01-07", "2026-01-08", "2026-01-09", "2026-01-12", "2026-01-13", "2026-01-14", "2026-01-15", "2026-01-16", "2026-01-19", "2026-01-20", "2026-01-21", "2026-01-22", "2026-01-23", "2026-01-26", "2026-01-27", "2026-01-28", "2026-01-29", "2026-01-30", "2026-02-02", "2026-02-03", "2026-02-04", "2026-02-05", "2026-02-06", "2026-02-09", "2026-02-10", "2026-02-11", "2026-02-12", "2026-02-13", "2026-02-24", "2026-02-25", "2026-02-26", "2026-02-27", "2026-03-02", "2026-03-03", "2026-03-04", "2026-03-05", "2026-03-06", "2026-03-09", "2026-03-10", "2026-03-11", "2026-03-12", "2026-03-13", "2026-03-16", "2026-03-17", "2026-03-18", "2026-03-19", "2026-03-20", "2026-03-23", "2026-03-24", "2026-03-25", "2026-03-26", "2026-03-27", "2026-03-30", "2026-03-31", "2026-04-01", "2026-04-02", "2026-04-03", "2026-04-07", "2026-04-08", "2026-04-09", "2026-04-10", "2026-04-13", "2026-04-14", "2026-04-15", "2026-04-16", "2026-04-17", "2026-04-20", "2026-04-21", "2026-04-22", "2026-04-23", "2026-04-24", "2026-04-27", "2026-04-28", "2026-04-29", "2026-04-30", "2026-05-06", "2026-05-07", "2026-05-08", "2026-05-11", "2026-05-12", "2026-05-13", "2026-05-14", "2026-05-15", "2026-05-18", "2026-05-19", "2026-05-20", "2026-05-21", "2026-05-22", "2026-05-25", "2026-05-26", "2026-05-27", "2026-05-28", "2026-05-29", "2026-06-01", "2026-06-02", "2026-06-03", "2026-06-04", "2026-06-05", "2026-06-08", "2026-06-09", "2026-06-10", "2026-06-11", "2026-06-12", "2026-06-15", "2026-06-16", "2026-06-17", "2026-06-18", "2026-06-22", "2026-06-23", "2026-06-24", "2026-06-25", "2026-06-26", "2026-06-29"];
+const ohlc = [[3.98, 3.99, 3.98, 4.02], [4.0, 3.99, 3.97, 4.01], [3.99, 3.98, 3.97, 3.99], [3.99, 4.02, 3.98, 4.03], [4.02, 4.0, 3.99, 4.03], [3.99, 3.96, 3.95, 4.0], [3.96, 4.0, 3.95, 4.0], [3.99, 3.98, 3.97, 4.02], [3.98, 4.03, 3.98, 4.06], [4.03, 4.06, 4.0, 4.08], [4.05, 4.05, 4.04, 4.07], [4.04, 3.97, 3.96, 4.04], [3.97, 3.95, 3.94, 3.98], [3.95, 4.04, 3.94, 4.04], [4.04, 3.99, 3.97, 4.05], [3.99, 4.07, 3.98, 4.1], [4.06, 4.11, 4.04, 4.11], [4.11, 4.1, 4.09, 4.14], [4.1, 4.13, 4.1, 4.13], [4.13, 4.1, 4.09, 4.13], [4.11, 4.1, 4.08, 4.11], [4.09, 4.11, 4.06, 4.12], [4.1, 4.08, 4.06, 4.12], [4.08, 4.04, 4.02, 4.09], [4.03, 4.03, 4.02, 4.08], [4.03, 4.02, 3.99, 4.04], [4.02, 4.04, 4.01, 4.08], [4.06, 4.06, 4.03, 4.06], [4.06, 4.03, 4.02, 4.07], [4.03, 4.0, 4.0, 4.04], [4.01, 4.01, 3.99, 4.03], [4.01, 3.99, 3.98, 4.02], [3.99, 3.98, 3.98, 4.0], [3.98, 3.9, 3.9, 3.99], [3.89, 3.96, 3.88, 3.96], [3.96, 3.95, 3.94, 3.99], [3.95, 3.93, 3.92, 3.96], [3.92, 4.01, 3.9, 4.01], [4.01, 4.04, 4.0, 4.08], [4.04, 4.18, 4.03, 4.2], [4.21, 4.16, 4.11, 4.23], [4.15, 4.18, 4.13, 4.21], [4.16, 4.13, 4.12, 4.27], [4.15, 4.21, 4.1, 4.21], [4.2, 4.23, 4.18, 4.26], [4.24, 4.2, 4.16, 4.25], [4.19, 4.11, 4.08, 4.19], [4.12, 4.04, 4.02, 4.12], [4.05, 4.05, 4.01, 4.15], [4.07, 4.11, 4.03, 4.11], [4.11, 4.13, 4.07, 4.17], [4.12, 4.1, 4.06, 4.13], [4.1, 4.08, 4.06, 4.1], [4.08, 4.16, 4.06, 4.16], [4.19, 4.17, 4.15, 4.2], [4.17, 4.16, 4.15, 4.25], [4.17, 4.13, 4.1, 4.18], [4.13, 4.16, 4.1, 4.18], [4.16, 4.14, 4.1, 4.22], [4.12, 4.13, 4.12, 4.18], [4.13, 4.14, 4.08, 4.18], [4.15, 4.16, 4.05, 4.18], [4.14, 4.21, 4.11, 4.22], [4.2, 4.17, 4.15, 4.21], [4.16, 4.1, 4.1, 4.17], [4.1, 4.12, 4.04, 4.13], [4.11, 4.16, 4.11, 4.17], [4.17, 4.28, 4.17, 4.34], [4.26, 4.17, 4.16, 4.27], [4.08, 4.11, 4.04, 4.12], [4.12, 4.06, 4.05, 4.15], [4.07, 4.1, 4.05, 4.12], [4.1, 4.08, 4.06, 4.11], [4.07, 4.0, 4.0, 4.09], [4.03, 4.0, 3.99, 4.04], [4.01, 4.02, 4.0, 4.04], [4.02, 4.02, 4.01, 4.04], [4.02, 4.05, 4.0, 4.05], [4.05, 4.05, 4.03, 4.07], [4.07, 4.07, 4.05, 4.08], [4.06, 4.06, 4.04, 4.07], [4.05, 4.07, 4.04, 4.08], [4.07, 4.09, 4.06, 4.14], [4.1, 4.06, 4.05, 4.12], [4.06, 4.06, 4.03, 4.07], [4.05, 4.0, 4.0, 4.06], [3.99, 4.0, 3.96, 4.02], [4.0, 4.0, 3.99, 4.02], [4.0, 4.01, 3.98, 4.02], [4.01, 4.06, 3.99, 4.07], [4.07, 4.04, 4.03, 4.07], [4.04, 4.04, 4.01, 4.06], [4.03, 4.04, 4.02, 4.05], [4.02, 4.0, 3.99, 4.03], [3.99, 3.96, 3.96, 4.0], [3.96, 3.93, 3.92, 3.97], [3.92, 3.92, 3.88, 3.94], [3.92, 3.9, 3.9, 3.94], [3.88, 3.83, 3.82, 3.89], [3.84, 3.82, 3.79, 3.85], [3.83, 3.85, 3.82, 3.87], [3.86, 3.86, 3.85, 3.88], [3.86, 3.84, 3.83, 3.87], [3.84, 3.86, 3.82, 3.86], [3.86, 3.9, 3.85, 3.91], [3.9, 3.88, 3.87, 3.91], [3.89, 4.03, 3.88, 4.08], [4.02, 4.05, 4.01, 4.08], [4.05, 4.26, 4.04, 4.26], [4.26, 4.21, 4.2, 4.35], [4.2, 4.17, 4.15, 4.23], [4.17, 4.18, 4.15, 4.24], [4.18, 4.11, 4.1, 4.19], [4.12, 4.14, 4.09, 4.16], [4.11, 4.13, 4.1, 4.18], [4.14, 4.14, 4.11, 4.18], [4.14, 4.17, 4.13, 4.19], [4.15, 4.11, 4.07, 4.16], [4.12, 4.09, 4.09, 4.13], [4.09, 4.04, 4.03, 4.1], [4.05, 4.04, 4.02, 4.06], [4.03, 4.06, 4.0, 4.07], [4.05, 4.06, 4.05, 4.08], [4.06, 4.04, 4.03, 4.07], [4.05, 4.13, 4.04, 4.2], [4.12, 4.17, 4.11, 4.2], [4.17, 4.21, 4.15, 4.27], [4.22, 4.23, 4.19, 4.27], [4.24, 4.5, 4.23, 4.54], [4.45, 4.36, 4.33, 4.47], [4.35, 4.35, 4.32, 4.39], [4.34, 4.41, 4.33, 4.54], [4.45, 4.46, 4.43, 4.51], [4.48, 4.46, 4.44, 4.55], [4.54, 4.6, 4.53, 4.73], [4.54, 4.53, 4.5, 4.61], [4.55, 4.46, 4.44, 4.57], [4.43, 4.51, 4.42, 4.54], [4.51, 4.45, 4.42, 4.53], [4.44, 4.46, 4.43, 4.51], [4.46, 4.4, 4.38, 4.48], [4.41, 4.45, 4.39, 4.51], [4.48, 4.47, 4.47, 4.55], [4.47, 4.56, 4.45, 4.6], [4.55, 4.53, 4.5, 4.58], [4.52, 4.45, 4.41, 4.54], [4.43, 4.37, 4.25, 4.45], [4.32, 4.24, 4.23, 4.37], [4.3, 4.31, 4.22, 4.33], [4.3, 4.39, 4.29, 4.42], [4.37, 4.41, 4.34, 4.41], [4.38, 4.37, 4.34, 4.42], [4.41, 4.35, 4.33, 4.42], [4.34, 4.32, 4.27, 4.35], [4.31, 4.29, 4.28, 4.34], [4.29, 4.23, 4.22, 4.3], [4.21, 4.18, 4.17, 4.23], [4.22, 4.28, 4.21, 4.3], [4.29, 4.36, 4.28, 4.39], [4.38, 4.33, 4.32, 4.38], [4.33, 4.48, 4.32, 4.49], [4.44, 4.49, 4.43, 4.59], [4.51, 4.32, 4.31, 4.53], [4.29, 4.32, 4.26, 4.38], [4.38, 4.46, 4.38, 4.53], [4.42, 4.37, 4.31, 4.43], [4.31, 4.31, 4.22, 4.33], [4.35, 4.35, 4.33, 4.39], [4.34, 4.39, 4.33, 4.4], [4.4, 4.42, 4.38, 4.47], [4.4, 4.36, 4.35, 4.45], [4.34, 4.23, 4.2, 4.34], [4.25, 4.18, 4.18, 4.27], [4.23, 4.2, 4.15, 4.23], [4.15, 4.09, 4.08, 4.16], [4.11, 4.08, 4.07, 4.15], [4.01, 3.87, 3.85, 4.02], [3.92, 4.0, 3.9, 4.0], [4.03, 3.99, 3.98, 4.04], [3.99, 3.94, 3.93, 4.01], [3.91, 3.95, 3.9, 3.97], [3.91, 3.94, 3.89, 3.95], [3.93, 3.91, 3.9, 3.97], [4.01, 4.01, 3.97, 4.06], [4.01, 3.95, 3.93, 4.01], [3.96, 3.93, 3.92, 3.97], [3.95, 3.91, 3.89, 3.95], [3.98, 4.03, 3.95, 4.04], [3.99, 4.01, 3.97, 4.03], [4.05, 4.04, 4.03, 4.08], [4.01, 4.03, 3.99, 4.04], [4.05, 4.02, 3.99, 4.08], [4.04, 4.0, 4.0, 4.06], [4.01, 4.03, 3.98, 4.04], [4.01, 4.02, 4.0, 4.04], [4.06, 4.19, 4.05, 4.24], [4.19, 4.22, 4.14, 4.34], [4.2, 4.27, 4.2, 4.28], [4.26, 4.19, 4.17, 4.29], [4.17, 4.13, 4.11, 4.19], [4.15, 4.21, 4.13, 4.22], [4.2, 4.15, 4.14, 4.21], [4.14, 4.17, 4.12, 4.18], [4.13, 4.08, 4.08, 4.18], [4.11, 4.18, 4.09, 4.22], [4.2, 4.21, 4.16, 4.25], [4.19, 4.17, 4.12, 4.19], [4.17, 4.19, 4.16, 4.23], [4.19, 4.17, 4.14, 4.23], [4.17, 4.23, 4.15, 4.23], [4.28, 4.22, 4.2, 4.33], [4.22, 4.14, 4.12, 4.24], [4.12, 4.21, 4.08, 4.23], [4.2, 4.31, 4.17, 4.32], [4.29, 4.26, 4.24, 4.31], [4.69, 4.69, 4.69, 4.69], [4.7, 5.16, 4.47, 5.16], [5.17, 5.27, 5.06, 5.37], [5.22, 5.77, 5.18, 5.8], [5.8, 5.72, 5.53, 6.09], [5.72, 5.68, 5.51, 5.78], [5.63, 5.11, 5.11, 5.64], [5.12, 5.36, 5.12, 5.59], [5.31, 5.47, 5.11, 5.54], [5.58, 5.59, 5.53, 5.92], [5.69, 6.15, 5.69, 6.15], [6.11, 6.43, 6.01, 6.77], [6.48, 6.29, 6.22, 6.74], [6.49, 6.52, 6.14, 6.64], [6.34, 6.03, 5.94, 6.38], [6.0, 5.83, 5.7, 6.12], [5.95, 5.57, 5.56, 6.01], [5.74, 5.92, 5.73, 6.01], [5.93, 6.1, 5.86, 6.23], [6.06, 6.71, 6.05, 6.71], [6.86, 6.55, 6.49, 6.93], [6.8, 6.93, 6.68, 7.18], [6.85, 6.77, 6.61, 7.07], [6.7, 7.07, 6.57, 7.15], [7.33, 7.52, 7.14, 7.67], [7.5, 7.79, 7.36, 8.24], [7.96, 7.95, 7.51, 8.21]];
+const volumes = [2690950.83, 2199456.46, 2008557.26, 3453443.7, 2932952.57, 2719031.4, 2492129.2, 3174590.01, 5355399.39, 4314365.92, 3538385.31, 5226585.21, 3061837.52, 4621115.65, 3517360.4, 5404258.05, 4571962.26, 4282163.9, 3354030.1, 2770988.16, 2530670.26, 3425207.84, 3178748.94, 4340047.68, 3357154.26, 3102281.77, 3435975.32, 2438859.96, 2904685.93, 3141822.36, 4151971.92, 3821962.05, 3870022.32, 8580024.04, 5651613.21, 6357098.87, 4599047.95, 7221610.47, 8066589.14, 12981755.06, 9865264.78, 8765130.9, 10880526.43, 9417531.82, 9459846.72, 7212975.16, 7708187.62, 5745840.94, 9105493.41, 6266116.1, 5714247.58, 4612171.73, 3644817.35, 7051552.08, 5953652.34, 5787836.98, 5098731.45, 5275441.19, 8427305.92, 5535342.22, 5037545.98, 7129824.87, 9485993.11, 6549625.42, 7091057.95, 7313187.76, 6941579.65, 11954060.82, 8704489.13, 10634842.68, 8429044.61, 5682302.58, 4037342.72, 6538105.72, 4153328.58, 3495761.08, 2414810.62, 3398282.22, 2712257.72, 3887685.98, 3409723.06, 3518629.4, 6314409.17, 5405928.41, 3778568.28, 4983636.31, 4124789.74, 3145668.56, 3042867.42, 5715496.57, 3508117.1, 4891171.08, 3840009.65, 3937048.65, 4118776.81, 4187631.5, 4432660.9, 3542675.23, 5257286.69, 4752872.61, 3576158.39, 2765761.3, 2477697.57, 2353449.96, 3655252.97, 3142161.27, 13007301.82, 7947714.47, 19001402.69, 11891016.05, 7528102.84, 6945594.86, 5553656.32, 7000578.24, 7297572.0, 7693817.68, 7090169.91, 6223879.6, 4307934.25, 6908224.0, 5196733.75, 5238621.62, 3543810.01, 3746384.52, 9222853.57, 6100018.37, 8178798.46, 8507615.74, 21037707.63, 12759382.61, 6804691.24, 10734673.84, 8673354.26, 9137920.34, 17724765.89, 8700734.04, 8670025.83, 7046849.23, 7452622.22, 7448743.89, 7855614.84, 10667076.97, 8984303.15, 10984987.92, 8123266.97, 8639900.73, 9623972.86, 7248654.55, 6299312.86, 7454418.78, 6053281.52, 4937934.05, 5361544.55, 4476845.0, 3719746.0, 5176990.04, 5374416.9, 5400877.86, 6011700.62, 4600391.97, 10992669.2, 10247287.73, 9324251.78, 6794714.2, 10403170.51, 9379855.04, 8427997.74, 5721243.1, 5817267.39, 7535263.71, 5289827.69, 9061153.01, 5143566.08, 5050720.77, 5203475.25, 4842912.17, 9139186.96, 5840203.78, 4393007.14, 3942963.09, 3566304.61, 3567123.42, 3892818.16, 5831403.9, 3903944.85, 2770513.91, 3465296.02, 5790904.52, 4182505.87, 4622697.81, 4046436.36, 4426940.75, 5348927.54, 4154284.81, 3098676.54, 11904594.49, 11348023.66, 6812882.43, 6914901.45, 4600997.83, 4824065.9, 3954386.34, 4140091.11, 7454049.05, 8280384.8, 6650425.71, 6379056.58, 6100839.81, 6185212.96, 6382205.86, 8761121.34, 8215945.31, 8399587.01, 8801051.22, 5717787.43, 10360099.56, 60110591.97, 43088758.18, 51377251.21, 50185215.56, 32854868.53, 36253858.64, 33868875.93, 30258455.29, 36797583.81, 33229988.19, 55041155.19, 45998759.18, 40031647.16, 32284804.44, 32996828.55, 29146433.93, 29928306.68, 26028372.28, 18550205.5, 40032426.76, 36729053.39, 29140578.3, 35877142.21, 36963548.24, 45251768.76, 41524576.45];
+const ma5 = [null, null, null, null, 3.996, 3.99, 3.992, 3.992, 3.994, 4.006, 4.024, 4.018, 4.012, 4.014, 4.0, 4.004, 4.032, 4.062, 4.08, 4.102, 4.108, 4.108, 4.104, 4.086, 4.072, 4.056, 4.042, 4.038, 4.036, 4.03, 4.028, 4.018, 4.002, 3.976, 3.968, 3.956, 3.944, 3.95, 3.978, 4.022, 4.064, 4.114, 4.138, 4.172, 4.182, 4.19, 4.176, 4.158, 4.126, 4.102, 4.088, 4.086, 4.094, 4.116, 4.128, 4.134, 4.14, 4.156, 4.152, 4.144, 4.14, 4.146, 4.156, 4.162, 4.156, 4.152, 4.152, 4.166, 4.166, 4.168, 4.156, 4.144, 4.104, 4.07, 4.048, 4.04, 4.024, 4.018, 4.028, 4.042, 4.05, 4.06, 4.068, 4.07, 4.068, 4.056, 4.042, 4.024, 4.014, 4.014, 4.022, 4.03, 4.038, 4.036, 4.016, 3.994, 3.97, 3.942, 3.908, 3.88, 3.864, 3.852, 3.84, 3.846, 3.862, 3.868, 3.902, 3.944, 4.024, 4.086, 4.144, 4.174, 4.186, 4.162, 4.146, 4.14, 4.138, 4.138, 4.128, 4.11, 4.09, 4.068, 4.058, 4.048, 4.066, 4.092, 4.122, 4.156, 4.248, 4.294, 4.33, 4.37, 4.416, 4.408, 4.456, 4.492, 4.502, 4.512, 4.51, 4.482, 4.456, 4.454, 4.446, 4.468, 4.482, 4.492, 4.476, 4.43, 4.38, 4.352, 4.344, 4.344, 4.366, 4.368, 4.348, 4.312, 4.274, 4.26, 4.268, 4.276, 4.326, 4.388, 4.396, 4.388, 4.414, 4.392, 4.356, 4.362, 4.376, 4.368, 4.366, 4.35, 4.316, 4.278, 4.212, 4.156, 4.084, 4.048, 4.006, 3.976, 3.95, 3.964, 3.946, 3.95, 3.952, 3.948, 3.942, 3.966, 3.966, 3.984, 4.004, 4.026, 4.02, 4.024, 4.02, 4.052, 4.092, 4.146, 4.178, 4.2, 4.204, 4.19, 4.17, 4.148, 4.158, 4.158, 4.162, 4.166, 4.184, 4.194, 4.196, 4.19, 4.194, 4.222, 4.228, 4.322, 4.526, 4.738, 5.03, 5.322, 5.52, 5.51, 5.528, 5.468, 5.442, 5.536, 5.8, 5.986, 6.196, 6.284, 6.22, 6.048, 5.974, 5.89, 6.026, 6.17, 6.442, 6.612, 6.806, 6.968, 7.216, 7.42];
+const ma20 = [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 4.026, 4.031, 4.037, 4.042, 4.043, 4.045, 4.048, 4.05, 4.054, 4.054, 4.051, 4.049, 4.05, 4.051, 4.045, 4.043, 4.037, 4.028, 4.024, 4.019, 4.023, 4.026, 4.03, 4.032, 4.04, 4.051, 4.059, 4.063, 4.062, 4.063, 4.069, 4.074, 4.08, 4.085, 4.098, 4.109, 4.119, 4.129, 4.136, 4.141, 4.139, 4.138, 4.137, 4.141, 4.139, 4.133, 4.128, 4.131, 4.143, 4.149, 4.149, 4.146, 4.146, 4.146, 4.138, 4.129, 4.122, 4.117, 4.111, 4.106, 4.103, 4.099, 4.095, 4.089, 4.083, 4.082, 4.075, 4.067, 4.053, 4.045, 4.043, 4.042, 4.039, 4.037, 4.037, 4.035, 4.03, 4.026, 4.018, 4.007, 3.994, 3.984, 3.974, 3.961, 3.951, 3.943, 3.937, 3.938, 3.941, 3.953, 3.961, 3.967, 3.974, 3.978, 3.985, 3.994, 4.004, 4.016, 4.027, 4.04, 4.051, 4.06, 4.071, 4.082, 4.091, 4.102, 4.117, 4.125, 4.135, 4.146, 4.154, 4.163, 4.175, 4.192, 4.208, 4.231, 4.251, 4.266, 4.285, 4.303, 4.324, 4.342, 4.362, 4.383, 4.409, 4.428, 4.442, 4.45, 4.451, 4.441, 4.443, 4.446, 4.444, 4.438, 4.431, 4.416, 4.401, 4.387, 4.376, 4.371, 4.365, 4.369, 4.37, 4.363, 4.351, 4.348, 4.344, 4.341, 4.346, 4.35, 4.351, 4.349, 4.342, 4.333, 4.327, 4.317, 4.31, 4.295, 4.28, 4.262, 4.242, 4.216, 4.188, 4.168, 4.152, 4.127, 4.105, 4.085, 4.069, 4.05, 4.031, 4.014, 4.004, 3.995, 3.987, 3.983, 3.988, 4.006, 4.019, 4.03, 4.039, 4.052, 4.062, 4.075, 4.079, 4.091, 4.104, 4.117, 4.126, 4.133, 4.143, 4.152, 4.159, 4.169, 4.183, 4.195, 4.22, 4.267, 4.317, 4.396, 4.476, 4.549, 4.597, 4.656, 4.726, 4.796, 4.894, 5.006, 5.112, 5.229, 5.319, 5.399, 5.471, 5.556, 5.646, 5.769, 5.862, 5.95, 6.025, 6.09, 6.18, 6.285, 6.428];
+
+const volumeColors = ohlc.map(item => (item[0] <= item[1] ? '#e53935' : '#43a047'));
+
+// ========== K-line ==========
+const klineChart = echarts.init(document.getElementById('klineChart'));
+
+const allPrices = ohlc.flat();
+const priceMin = Math.min(...allPrices);
+const priceMax = Math.max(...allPrices);
+const padding = (priceMax - priceMin) * 0.08;
+
+klineChart.setOption({
+    tooltip: {
+        trigger: 'axis',
+        axisPointer: { type: 'cross' },
+        backgroundColor: 'rgba(255,255,255,0.95)',
+        borderColor: '#ddd',
+        borderWidth: 1,
+        textStyle: { color: '#333', fontSize: 12 },
+        formatter: function(params) {
+            const p = params[0];
+            if (!p) return '';
+            const idx = p.dataIndex;
+            const d = ohlc[idx];
+            const dateStr = dates[idx];
+            const volVal = (volumes[idx] / 10000).toFixed(1);
+            const changePct = ((d[1] - d[0]) / d[0] * 100).toFixed(2);
+            const color = d[0] <= d[1] ? '#e53935' : '#43a047';
+            const sign = d[0] <= d[1] ? '+' : '';
+            return `
+                <div style="font-weight:600;margin-bottom:4px;">${dateStr}</div>
+                <div>开盘: <b>${d[0].toFixed(2)}</b></div>
+                <div>收盘: <b style="color:${color}">${d[1].toFixed(2)}</b></div>
+                <div>最高: <b>${d[2].toFixed(2)}</b></div>
+                <div>最低: <b>${d[3].toFixed(2)}</b></div>
+                <div>涨跌幅: <b style="color:${color}">${sign}${changePct}%</b></div>
+                <div>成交量: <b>${volVal}万手</b></div>
+            `;
+        }
+    },
+    grid: { left: '6%', right: '6%', bottom: '8%', top: '6%' },
+    xAxis: {
+        type: 'category',
+        data: dates,
+        axisLine: { lineStyle: { color: '#ddd' } },
+        axisLabel: {
+            color: '#78909c',
+            fontSize: 11,
+            rotate: 30,
+            interval: Math.max(Math.floor(dates.length / 20), 1)
+        },
+        splitLine: { show: false }
+    },
+    yAxis: {
+        scale: true,
+        min: priceMin - padding,
+        max: priceMax + padding,
+        splitLine: { lineStyle: { color: '#f0f0f0', type: 'dashed' } },
+        axisLabel: { color: '#78909c', fontSize: 11 },
+        name: '价格(元)',
+        nameTextStyle: { color: '#90a4ae', fontSize: 11 }
+    },
+    dataZoom: [
+        { type: 'inside', xAxisIndex: 0, start: 0, end: 100 },
+        { type: 'slider', xAxisIndex: 0, start: 0, end: 100, height: 20, bottom: 2,
+           borderColor: '#ddd', fillerColor: 'rgba(21,101,192,0.15)',
+           handleStyle: { color: '#1976d2' },
+           textStyle: { color: '#78909c' }
+        }
+    ],
+    series: [
+        {
+            name: '日K',
+            type: 'candlestick',
+            data: ohlc,
+            itemStyle: {
+                color: '#e53935',
+                color0: '#43a047',
+                borderColor: '#e53935',
+                borderColor0: '#43a047'
+            },
+            markLine: {
+                silent: true,
+                data: [
+                    { yAxis: priceMax, label: { formatter: '最高 ' + priceMax.toFixed(2), color: '#e53935', fontSize: 11 }, lineStyle: { color: '#e53935', type: 'dashed', opacity: 0.5 } },
+                    { yAxis: priceMin, label: { formatter: '最低 ' + priceMin.toFixed(2), color: '#43a047', fontSize: 11 }, lineStyle: { color: '#43a047', type: 'dashed', opacity: 0.5 } }
+                ]
+            }
+        },
+        {
+            name: 'MA5',
+            type: 'line',
+            data: ma5,
+            smooth: true,
+            showSymbol: false,
+            lineStyle: { width: 1.5, color: '#fdd835' },
+            symbol: 'none'
+        },
+        {
+            name: 'MA20',
+            type: 'line',
+            data: ma20,
+            smooth: true,
+            showSymbol: false,
+            lineStyle: { width: 1.5, color: '#7b1fa2' },
+            symbol: 'none'
+        }
+    ]
+});
+
+// ========== Volume ==========
+const volumeChart = echarts.init(document.getElementById('volumeChart'));
+
+volumeChart.setOption({
+    tooltip: {
+        trigger: 'axis',
+        axisPointer: { type: 'shadow' },
+        backgroundColor: 'rgba(255,255,255,0.95)',
+        borderColor: '#ddd',
+        borderWidth: 1,
+        textStyle: { color: '#333', fontSize: 12 },
+        formatter: function(params) {
+            const p = params[0];
+            if (!p) return '';
+            const idx = p.dataIndex;
+            const dateStr = dates[idx];
+            const volVal = (volumes[idx] / 10000).toFixed(1);
+            return `${dateStr}<br/>成交量: <b>${volVal}万手</b>`;
+        }
+    },
+    grid: { left: '6%', right: '6%', bottom: '8%', top: '6%' },
+    xAxis: {
+        type: 'category',
+        data: dates,
+        axisLine: { show: false },
+        axisLabel: { show: false },
+        splitLine: { show: false }
+    },
+    yAxis: {
+        type: 'value',
+        splitLine: { lineStyle: { color: '#f0f0f0', type: 'dashed' } },
+        axisLabel: {
+            color: '#78909c',
+            fontSize: 11,
+            formatter: function(v) { return (v / 10000).toFixed(0) + '万'; }
+        },
+        name: '成交量(手)',
+        nameTextStyle: { color: '#90a4ae', fontSize: 11 }
+    },
+    series: [
+        {
+            name: '成交量',
+            type: 'bar',
+            data: volumes.map((v, i) => ({
+                value: v,
+                itemStyle: { color: volumeColors[i] }
+            })),
+            barWidth: '60%'
+        }
+    ]
+});
+
+window.addEventListener('resize', function() {
+    klineChart.resize();
+    volumeChart.resize();
+});
+
+function toggleTable() {
+    const el = document.getElementById('dataTable');
+    el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+</script>
+</body>
+</html>

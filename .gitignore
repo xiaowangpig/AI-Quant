@@ -1,0 +1,5 @@
+# 忽略敏感数据
+*.token
+*.key
+.env
+**/__pycache__/
