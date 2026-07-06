@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI-Quant Lab — 技术指标交互计算工作台</title>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+<script src="js/indicators.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;background:#f5f6fa;color:#2c3e50;padding:16px;min-height:100vh}
+.container{max-width:1400px;margin:0 auto;background:#fff;border-radius:12px;box-shadow:0 2px 12px rgba(0,0,0,0.06);overflow:hidden}
+.header{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;background:linear-gradient(135deg,#1a237e,#283593);color:#fff}
+.header h1{font-size:17px;font-weight:600}
+.header .badge{font-size:11px;opacity:.7;background:rgba(255,255,255,.15);padding:2px 8px;border-radius:10px;margin-left:8px}
+.header .status{display:flex;align-items:center;gap:6px;font-size:12px;opacity:.8}
+.toolbar{display:flex;align-items:center;gap:10px;padding:10px 20px;border-bottom:1px solid #e0e0e0;flex-wrap:wrap;background:#fafafa}
+.toolbar select{padding:5px 10px;border-radius:6px;border:1px solid #d0d0d0;font-size:13px;background:#fff;min-width:170px}
+.quick-btn{padding:4px 10px;font-size:12px;border:1px solid #d0d0d0;border-radius:4px;background:#fff;cursor:pointer;transition:all .15s}
+.quick-btn:hover{background:#e8eaf6}
+.quick-btn.active{background:#e8eaf6;border-color:#5c6bc0;font-weight:500;color:#1a237e}
+.toolbar input[type=date]{padding:3px 6px;border-radius:4px;border:1px solid #d0d0d0;font-size:12px}
+.date-sep{font-size:12px;color:#90a4ae}
+.main{display:flex;min-height:520px}
+/* Sidebar */
+.sidebar{width:285px;flex-shrink:0;border-right:1px solid #eee;padding:12px;background:#fafafa;overflow-y:auto}
+.view-tabs{display:flex;gap:3px;margin-bottom:10px}
+.view-tabs button{flex:1;padding:6px 0;font-size:12px;border:1px solid #d0d0d0;border-radius:5px;background:#fff;cursor:pointer;transition:all .15s;font-weight:400}
+.view-tabs button:hover{background:#e8eaf6}
+.view-tabs button.active{background:#e8eaf6;border-color:#5c6bc0;font-weight:500;color:#1a237e}
+.param-card{border:1px solid #e8e8e8;border-radius:8px;padding:10px 12px;margin-bottom:8px;background:#fff}
+.param-card h3{font-size:13px;font-weight:500;margin-bottom:7px;display:flex;align-items:center;gap:6px}
+.param-card .dot{width:8px;height:8px;border-radius:2px;display:inline-block;flex-shrink:0}
+.param-row{display:flex;align-items:center;gap:6px;margin-bottom:4px}
+.param-row label{font-size:11px;color:#78909c;min-width:36px;flex-shrink:0}
+.param-row input[type=range]{flex:1;height:4px;cursor:pointer;accent-color:#5c6bc0}
+.param-row .range-val{font-size:12px;min-width:26px;text-align:right;font-weight:500;color:#37474f}
+.param-row input[type=number]{width:52px;padding:2px 4px;border-radius:4px;border:1px solid #d0d0d0;font-size:12px;text-align:center}
+.param-row select{padding:2px 4px;border-radius:4px;border:1px solid #d0d0d0;font-size:12px;background:#fff}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:4px 8px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px 6px}
+.action-row{display:flex;gap:8px;margin-top:10px}
+.action-row button{flex:1;padding:7px 0;font-size:12px;border-radius:6px;cursor:pointer;transition:all .15s}
+.btn-primary{background:#e8eaf6;border:1px solid #5c6bc0;font-weight:500;color:#1a237e}
+.btn-primary:hover{background:#c5cae9}
+.btn-secondary{background:#fff;border:1px solid #d0d0d0}
+.btn-secondary:hover{background:#f5f5f5}
+/* Chart area */
+.chart-area{flex:1;padding:16px;display:flex;flex-direction:column}
+.chart-box{flex:1;border:1px solid #eee;border-radius:10px;background:#fff;position:relative;min-height:360px}
+#mainChart{width:100%;height:100%;min-height:360px}
+.check-row{display:flex;justify-content:flex-end;gap:12px;margin-top:8px;font-size:12px;color:#78909c}
+.check-row label{display:flex;align-items:center;gap:4px;cursor:pointer}
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px}
+.metric{background:#f5f7fa;border-radius:8px;padding:8px 12px;display:flex;justify-content:space-between;align-items:center;border:1px solid #eee}
+.metric .lbl{font-size:11px;color:#90a4ae}
+.metric .val{font-size:14px;font-weight:600}
+.footer{display:flex;justify-content:space-between;padding:10px 20px;border-top:1px solid #eee;font-size:11px;color:#90a4ae;background:#fafafa}
+@media(max-width:900px){.sidebar{width:220px}.param-row input[type=number]{width:44px}}
+@media(max-width:700px){.sidebar{width:100%;border-right:none;border-bottom:1px solid #eee}.main{flex-direction:column}}
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <div><h1>AI-Quant Lab</h1></div>
+    <div class="status"><span style="width:6px;height:6px;border-radius:50%;background:#43a047;display:inline-block"></span> 计算引擎: 浏览器端 JS | ECharts 5</div>
+  </div>
+
+  <div class="toolbar" id="toolbar">
+    <select id="stockSelect"></select>
+    <div style="display:flex;gap:4px">
+      <button class="quick-btn" data-range="1m">近1月</button>
+      <button class="quick-btn" data-range="3m">近3月</button>
+      <button class="quick-btn active" data-range="1y">近1年</button>
+      <button class="quick-btn" data-range="all">全部</button>
+    </div>
+    <input type="date" id="dateStart"> <span class="date-sep">~</span> <input type="date" id="dateEnd">
+  </div>
+
+  <div class="main">
+    <div class="sidebar" id="sidebar">
+      <div class="view-tabs" id="viewTabs">
+        <button data-view="kline">K线</button>
+        <button data-view="rsi" class="active">RSI</button>
+        <button data-view="macd">MACD</button>
+        <button data-view="bb">布林</button>
+        <button data-view="atr">ATR</button>
+      </div>
+      <div id="paramPanel"></div>
+    </div>
+    <div class="chart-area">
+      <div class="chart-box"><div id="mainChart"></div></div>
+      <div class="metrics" id="metricsBar">
+        <div class="metric"><span class="lbl">RSI(14)</span><span class="val" style="color:#6a1b9a" id="mRsi">--</span></div>
+        <div class="metric"><span class="lbl">MACD</span><span class="val" style="color:#1565c0" id="mMacd">--</span></div>
+        <div class="metric"><span class="lbl">%B</span><span class="val" style="color:#e65100" id="mPctB">--</span></div>
+        <div class="metric"><span class="lbl">ATR(14)</span><span class="val" style="color:#ff6f00" id="mAtr">--</span></div>
+      </div>
+      <div class="check-row">
+        <label><input type="checkbox" id="chkMA" checked> 显示均线 (MA5/MA20)</label>
+        <label><input type="checkbox" id="chkVol" checked> 显示成交量</label>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <span>数据源: 预加载 A股 / 港股 | 计算引擎: indicators.js</span>
+    <span id="dataInfo">--</span>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// 股票数据
+// ============================================================
+const STOCKS_DATA = (function() {
+  function genPrice(base, days, volatility) {
+    const data = [];
+    let price = base;
+    let d = new Date('2025-07-03');
+    for (let i = 0; i < days; i++) {
+      d = new Date(d.getTime() + 86400000);
+      if (d.getDay() === 0 || d.getDay() === 6) continue;
+      const trend = Math.sin(i / days * Math.PI * 1.5) * base * 0.3;
+      const noise = (Math.random() - 0.5) * base * volatility;
+      const open = Math.round((price + noise) * 100) / 100;
+      const range = base * volatility * (0.5 + Math.random());
+      const high = Math.round((open + range * (0.6 + Math.random() * 0.4)) * 100) / 100;
+      const low = Math.round((open - range * (0.3 + Math.random() * 0.3)) * 100) / 100;
+      const close = Math.round((low + (high - low) * (0.2 + Math.random() * 0.6)) * 100) / 100;
+      const vol = Math.round((1000000 + Math.random() * 50000000) * (1 + range / base));
+      data.push({date: formatDate(d), open, high, low, close, vol});
+      price = close + trend * 0.01;
+    }
+    return data;
+  }
+  function formatDate(d) {
+    const y = d.getFullYear(), m = String(d.getMonth()+1).padStart(2,'0'), day = String(d.getDate()).padStart(2,'0');
+    return y+'-'+m+'-'+day;
+  }
+  return {
+    '688981.SH': { name:'中芯国际', market:'科创板', data: genPrice(88, 380, 0.035) },
+    '000725.SZ': { name:'京东方A', market:'深市', data: genPrice(4, 380, 0.04) },
+    '002594.SZ': { name:'比亚迪', market:'深市', data: genPrice(280, 380, 0.038) },
+    '600900.SH': { name:'长江电力', market:'沪市', data: genPrice(28, 380, 0.025) },
+    '600519.SH': { name:'贵州茅台', market:'沪市', data: genPrice(1500, 380, 0.03) },
+    '00700.HK': { name:'腾讯控股', market:'港股', data: genPrice(380, 380, 0.035) },
+    '00981.HK': { name:'中芯国际(港)', market:'港股', data: genPrice(45, 380, 0.045) },
+  };
+})();
+
+// ============================================================
+// 应用状态
+// ============================================================
+const state = {
+  stock: '000725.SZ',
+  view: 'rsi',
+  dateRange: '1y',
+  params: {
+    rsi: { period: 14, overbought: 70, oversold: 30 },
+    macd: { fast: 12, slow: 26, signal: 9 },
+    bb: { period: 20, k: 2.0, maType: 'sma' },
+    atr: { period: 14, smooth: 'sma' },
+  },
+  showMA: true,
+  showVol: true,
+};
+
+let chart = null;
+
+// ============================================================
+// DOM 引用
+// ============================================================
+const $ = id => document.getElementById(id);
+const stockSelect = $('stockSelect');
+const viewTabs = $('viewTabs');
+const paramPanel = $('paramPanel');
+const mainChart = $('mainChart');
+const dateStart = $('dateStart'), dateEnd = $('dateEnd');
+const mRsi = $('mRsi'), mMacd = $('mMacd'), mPctB = $('mPctB'), mAtr = $('mAtr');
+const dataInfo = $('dataInfo');
+
+// ============================================================
+// 初始化股票选择器
+// ============================================================
+Object.entries(STOCKS_DATA).forEach(([code, info]) => {
+  const opt = document.createElement('option');
+  opt.value = code;
+  opt.textContent = `${info.name} (${code})`;
+  stockSelect.appendChild(opt);
+});
+
+// ============================================================
+// 日期范围
+// ============================================================
+function updateDateRange(range) {
+  const data = STOCKS_DATA[state.stock].data;
+  const last = data[data.length - 1].date;
+  const endDate = new Date(last);
+  let startDate;
+  switch(range) {
+    case '1m': startDate = new Date(endDate); startDate.setMonth(startDate.getMonth()-1); break;
+    case '3m': startDate = new Date(endDate); startDate.setMonth(startDate.getMonth()-3); break;
+    case '1y': startDate = new Date(endDate); startDate.setFullYear(startDate.getFullYear()-1); break;
+    default: startDate = new Date(data[0].date); break;
+  }
+  dateStart.value = startDate.toISOString().slice(0,10);
+  dateEnd.value = endDate.toISOString().slice(0,10);
+}
+
+function getFilteredData() {
+  const data = STOCKS_DATA[state.stock].data;
+  const start = dateStart.value, end = dateEnd.value;
+  return data.filter(d => d.date >= start && d.date <= end);
+}
+
+// ============================================================
+// 参数面板渲染
+// ============================================================
+function renderParams() {
+  const p = state.params;
+  const v = state.view;
+  let html = '';
+  const slider = (label, key, min, max, val, step=1) =>
+    `<div class="param-row"><label>${label}</label><input type="range" min="${min}" max="${max}" value="${val}" step="${step}" data-key="${key}"><span class="range-val">${val}</span></div>`;
+  const numInput = (label, key, val, min, max, step=1) =>
+    `<div><label style="font-size:11px;color:#78909c;display:block;margin-bottom:2px">${label}</label><input type="number" value="${val}" min="${min}" max="${max}" step="${step}" data-key="${key}" style="width:100%;padding:3px 4px;border-radius:4px;border:1px solid #d0d0d0;font-size:12px;text-align:center"></div>`;
+
+  if (v === 'kline') {
+    html = `<div class="param-card"><h3><span class="dot" style="background:#1a237e"></span>均线设置</h3>
+      <div class="grid-2">${numInput('MA1 周期', 'ma1', 5, 2, 120)}${numInput('MA2 周期', 'ma2', 20, 2, 120)}</div></div>`;
+  } else if (v === 'rsi') {
+    html = `<div class="param-card"><h3><span class="dot" style="background:#6a1b9a"></span>RSI 参数</h3>
+      ${slider('周期', 'rsi_period', 2, 50, p.rsi.period)}
+      <div class="grid-2">${slider('超买', 'rsi_ob', 50, 95, p.rsi.overbought)}${slider('超卖', 'rsi_os', 5, 50, p.rsi.oversold)}</div></div>`;
+  } else if (v === 'macd') {
+    html = `<div class="param-card"><h3><span class="dot" style="background:#1565c0"></span>MACD 参数</h3>
+      <div class="grid-3">${numInput('快线', 'macd_fast', p.macd.fast, 2, 50)}${numInput('慢线', 'macd_slow', p.macd.slow, 10, 100)}${numInput('信号', 'macd_sig', p.macd.signal, 2, 30)}</div></div>`;
+  } else if (v === 'bb') {
+    html = `<div class="param-card"><h3><span class="dot" style="background:#e65100"></span>布林带 参数</h3>
+      <div class="grid-3">${numInput('周期', 'bb_period', p.bb.period, 5, 100)}${numInput('K(σ)', 'bb_k', p.bb.k, 0.5, 4, 0.1)}
+      <div><label style="font-size:11px;color:#78909c;display:block;margin-bottom:2px">均线</label>
+      <select data-key="bb_ma" style="width:100%;padding:3px 4px;border-radius:4px;border:1px solid #d0d0d0;font-size:12px">
+        <option value="sma" ${p.bb.maType==='sma'?'selected':''}>SMA</option>
+        <option value="ema" ${p.bb.maType==='ema'?'selected':''}>EMA</option>
+      </select></div></div></div>`;
+  } else if (v === 'atr') {
+    html = `<div class="param-card"><h3><span class="dot" style="background:#ff6f00"></span>ATR 参数</h3>
+      ${slider('周期', 'atr_period', 2, 50, p.atr.period)}
+      <div class="param-row"><label>平滑</label>
+      <select data-key="atr_smooth" style="flex:1;padding:3px 4px;border-radius:4px;border:1px solid #d0d0d0;font-size:12px">
+        <option value="sma" ${p.atr.smooth==='sma'?'selected':''}>SMA</option>
+        <option value="ema" ${p.atr.smooth==='ema'?'selected':''}>EMA</option>
+      </select></div></div>`;
+  }
+  paramPanel.innerHTML = html;
+}
+
+// ============================================================
+// 指标计算
+// ============================================================
+function computeAll(data) {
+  if (!data || data.length < 30) return null;
+  const close = data.map(d => d.close);
+  const high = data.map(d => d.high);
+  const low = data.map(d => d.low);
+  const dates = data.map(d => d.date);
+  const p = state.params;
+
+  const rsiVals = computeRSI(close, p.rsi.period);
+  const macdResult = computeMACD(close, p.macd.fast, p.macd.slow, p.macd.signal);
+  const bbResult = computeBollingerBands(close, p.bb.period, p.bb.k, p.bb.maType);
+  const atrResult = computeATR(high, low, close, p.atr.period, p.atr.smooth);
+  const ma5 = computeSMA(close, 5);
+  const ma20 = computeSMA(close, 20);
+
+  // 更新底部指标栏
+  const last = data.length - 1;
+  mRsi.textContent = rsiVals[last] !== null ? rsiVals[last].toFixed(1) : '--';
+  mMacd.textContent = macdResult.macdLine[last] !== null ? (macdResult.macdLine[last] >= 0 ? '+' : '') + macdResult.macdLine[last].toFixed(2) : '--';
+  mPctB.textContent = bbResult.pctB[last] !== null ? bbResult.pctB[last].toFixed(2) : '--';
+  mAtr.textContent = atrResult.atr[last] !== null ? atrResult.atr[last].toFixed(2) : '--';
+
+  return { dates, close, high, low, open: data.map(d => d.open), vol: data.map(d => d.vol),
+    rsi: rsiVals, macdResult, bbResult, atrResult, ma5, ma20 };
+}
+
+// ============================================================
+// ECharts 渲染
+// ============================================================
+function renderChart(result) {
+  if (!result) return;
+  if (!chart) chart = echarts.init(mainChart);
+  const v = state.view;
+
+  if (v === 'kline') renderKline(result);
+  else if (v === 'rsi') renderRsi(result);
+  else if (v === 'macd') renderMacd(result);
+  else if (v === 'bb') renderBb(result);
+  else if (v === 'atr') renderAtr(result);
+  chart.setOption(option);
+}
+
+let option = {};
+
+function klineOption(result) {
+  const { dates, open, close, high, low, vol, ma5, ma20 } = result;
+  const ohlc = open.map((o,i) => [o, close[i], low[i], high[i]]);
+  const volColors = open.map((o,i) => close[i] >= o ? '#e53935' : '#43a047');
+
+  return {
+    tooltip: { trigger: 'axis', axisPointer: { type: 'cross' } },
+    legend: { data: ['日K','MA5','MA20','成交量'], top: 0, textStyle: { fontSize: 11 } },
+    grid: [{ left: '8%', right: '6%', top: '10%', height: '55%' }, { left: '8%', right: '6%', top: '75%', height: '18%' }],
+    xAxis: [{ type: 'category', data: dates, axisLabel: { rotate: 30, fontSize: 10, interval: Math.max(Math.floor(dates.length/15),1) }, gridIndex: 0 },
+            { type: 'category', data: dates, gridIndex: 1, axisLabel: { show: false } }],
+    yAxis: [{ scale: true, gridIndex: 0, splitLine: { lineStyle: { type: 'dashed' } } },
+            { scale: true, gridIndex: 1, splitLine: { show: false }, axisLabel: { formatter: v => (v/10000).toFixed(0)+'万' } }],
+    dataZoom: [{ type: 'inside', xAxisIndex: [0,1] }, { type: 'slider', xAxisIndex: [0,1], height: 16, bottom: 0 }],
+    series: [
+      { name: '日K', type: 'candlestick', data: ohlc, xAxisIndex: 0, yAxisIndex: 0,
+        itemStyle: { color: '#e53935', color0: '#43a047', borderColor: '#e53935', borderColor0: '#43a047' } },
+      { name: 'MA5', type: 'line', data: ma5, smooth: true, showSymbol: false, lineStyle: { width: 1.2, color: '#fdd835' }, xAxisIndex: 0, yAxisIndex: 0 },
+      { name: 'MA20', type: 'line', data: ma20, smooth: true, showSymbol: false, lineStyle: { width: 1.2, color: '#7b1fa2' }, xAxisIndex: 0, yAxisIndex: 0 },
+      { name: '成交量', type: 'bar', data: vol.map((v,i) => ({ value: v, itemStyle: { color: volColors[i] } })), xAxisIndex: 1, yAxisIndex: 1, barWidth: '60%' },
+    ]
+  };
+}
+
+function renderKline(result) {
+  option = klineOption(result);
+  // 控制均线/成交量显隐
+  const showMA = state.showMA, showVol = state.showVol;
+  option.series[1].data = showMA ? result.ma5 : [];
+  option.series[2].data = showMA ? result.ma20 : [];
+  option.series[3].data = showVol ? result.vol.map((v,i) => ({ value: v, itemStyle: { color: result.open[i] <= result.close[i] ? '#e53935' : '#43a047' } })) : [];
+}
+
+function renderRsi(result) {
+  const { dates, close, rsi, open } = result;
+  const p = state.params.rsi;
+  option = {
+    tooltip: { trigger: 'axis', axisPointer: { type: 'cross' } },
+    legend: { data: ['收盘价','RSI'], top: 0, textStyle: { fontSize: 11 } },
+    grid: [{ left: '8%', right: '6%', top: '10%', height: '55%' }, { left: '8%', right: '6%', top: '73%', height: '22%' }],
+    xAxis: [{ type: 'category', data: dates, axisLabel: { rotate: 30, fontSize: 10, interval: Math.max(Math.floor(dates.length/15),1) }, gridIndex: 0 },
+            { type: 'category', data: dates, gridIndex: 1, axisLabel: { show: false } }],
+    yAxis: [{ scale: true, gridIndex: 0, splitLine: { lineStyle: { type: 'dashed' } } },
+            { min: 0, max: 100, gridIndex: 1, splitLine: { lineStyle: { type: 'dashed' } } }],
+    dataZoom: [{ type: 'inside', xAxisIndex: [0,1] }, { type: 'slider', xAxisIndex: [0,1], height: 16, bottom: 0 }],
+    series: [
+      { name: '收盘价', type: 'line', data: close, showSymbol: false, lineStyle: { width: 1.5, color: '#1a237e' }, xAxisIndex: 0, yAxisIndex: 0 },
+      { name: 'RSI', type: 'line', data: rsi, showSymbol: false, lineStyle: { width: 1.5, color: '#6a1b9a' }, xAxisIndex: 1, yAxisIndex: 1,
+        markLine: { silent: true, data: [{ yAxis: p.overbought, label: { formatter: '超买 '+p.overbought, color:'#e53935', fontSize:10 }, lineStyle: { color:'#e53935', type:'dashed' } },
+                   { yAxis: p.oversold, label: { formatter: '超卖 '+p.oversold, color:'#43a047', fontSize:10 }, lineStyle: { color:'#43a047', type:'dashed' } }] },
+        markArea: { data: [[{ yAxis: p.overbought, itemStyle: { color: 'rgba(229,57,53,0.08)' } }, { yAxis: 100 }],
+                           [{ yAxis: 0, itemStyle: { color: 'rgba(67,160,71,0.08)' } }, { yAxis: p.oversold }]] } },
+    ]
+  };
+}
+
+function renderMacd(result) {
+  const { dates, close, macdResult } = result;
+  const { macdLine, signalLine, histogram } = macdResult;
+  const histColors = histogram.map(v => v >= 0 ? '#e53935' : '#43a047');
+  option = {
+    tooltip: { trigger: 'axis', axisPointer: { type: 'cross' } },
+    legend: { data: ['收盘价','MACD','信号线'], top: 0, textStyle: { fontSize: 11 } },
+    grid: [{ left: '8%', right: '6%', top: '10%', height: '55%' }, { left: '8%', right: '6%', top: '73%', height: '22%' }],
+    xAxis: [{ type: 'category', data: dates, axisLabel: { rotate: 30, fontSize: 10, interval: Math.max(Math.floor(dates.length/15),1) }, gridIndex: 0 },
+            { type: 'category', data: dates, gridIndex: 1, axisLabel: { show: false } }],
+    yAxis: [{ scale: true, gridIndex: 0, splitLine: { lineStyle: { type: 'dashed' } } },
+            { scale: true, gridIndex: 1, splitLine: { lineStyle: { type: 'dashed' } } }],
+    dataZoom: [{ type: 'inside', xAxisIndex: [0,1] }, { type: 'slider', xAxisIndex: [0,1], height: 16, bottom: 0 }],
+    series: [
+      { name: '收盘价', type: 'line', data: close, showSymbol: false, lineStyle: { width: 1.5, color: '#1a237e' }, xAxisIndex: 0, yAxisIndex: 0 },
+      { name: 'MACD', type: 'line', data: macdLine, showSymbol: false, lineStyle: { width: 1.5, color: '#1565c0' }, xAxisIndex: 1, yAxisIndex: 1 },
+      { name: '信号线', type: 'line', data: signalLine, showSymbol: false, lineStyle: { width: 1.2, color: '#e65100', type:'dashed' }, xAxisIndex: 1, yAxisIndex: 1 },
+      { name: '柱状图', type: 'bar', data: histogram.map((v,i) => ({ value: v, itemStyle: { color: histColors[i] } })), xAxisIndex: 1, yAxisIndex: 1, barWidth: '50%' },
+    ]
+  };
+}
+
+function renderBb(result) {
+  const { dates, close, bbResult } = result;
+  option = {
+    tooltip: { trigger: 'axis', axisPointer: { type: 'cross' } },
+    legend: { data: ['收盘价','上轨','中轨','下轨'], top: 0, textStyle: { fontSize: 11 } },
+    grid: [{ left: '8%', right: '6%', top: '10%', height: '55%' }, { left: '8%', right: '6%', top: '73%', height: '22%' }],
+    xAxis: [{ type: 'category', data: dates, axisLabel: { rotate: 30, fontSize: 10, interval: Math.max(Math.floor(dates.length/15),1) }, gridIndex: 0 },
+            { type: 'category', data: dates, gridIndex: 1, axisLabel: { show: false } }],
+    yAxis: [{ scale: true, gridIndex: 0, splitLine: { lineStyle: { type: 'dashed' } } },
+            { scale: true, gridIndex: 1, splitLine: { lineStyle: { type: 'dashed' } } }],
+    dataZoom: [{ type: 'inside', xAxisIndex: [0,1] }, { type: 'slider', xAxisIndex: [0,1], height: 16, bottom: 0 }],
+    series: [
+      { name: '收盘价', type: 'line', data: close, showSymbol: false, lineStyle: { width: 1.5, color: '#1a237e' }, xAxisIndex: 0, yAxisIndex: 0 },
+      { name: '上轨', type: 'line', data: bbResult.upper, showSymbol: false, lineStyle: { width: 1, color: '#e53935', type:'dashed' }, xAxisIndex: 0, yAxisIndex: 0 },
+      { name: '中轨', type: 'line', data: bbResult.middle, showSymbol: false, lineStyle: { width: 1.5, color: '#1a237e', opacity: 0.6 }, xAxisIndex: 0, yAxisIndex: 0 },
+      { name: '下轨', type: 'line', data: bbResult.lower, showSymbol: false, lineStyle: { width: 1, color: '#43a047', type:'dashed' }, xAxisIndex: 0, yAxisIndex: 0 },
+      { name: '带宽', type: 'line', data: bbResult.bandwidth, showSymbol: false, lineStyle: { width: 1.2, color: '#ff6f00' }, xAxisIndex: 1, yAxisIndex: 1 },
+    ]
+  };
+}
+
+function renderAtr(result) {
+  const { dates, close, atrResult } = result;
+  const atrPct = atrResult.atr.map((v,i) => v !== null && close[i] ? (v / close[i] * 100) : null);
+  option = {
+    tooltip: { trigger: 'axis', axisPointer: { type: 'cross' } },
+    legend: { data: ['收盘价','ATR'], top: 0, textStyle: { fontSize: 11 } },
+    grid: [{ left: '8%', right: '6%', top: '10%', height: '55%' }, { left: '8%', right: '6%', top: '73%', height: '22%' }],
+    xAxis: [{ type: 'category', data: dates, axisLabel: { rotate: 30, fontSize: 10, interval: Math.max(Math.floor(dates.length/15),1) }, gridIndex: 0 },
+            { type: 'category', data: dates, gridIndex: 1, axisLabel: { show: false } }],
+    yAxis: [{ scale: true, gridIndex: 0, splitLine: { lineStyle: { type: 'dashed' } } },
+            { scale: true, gridIndex: 1, splitLine: { lineStyle: { type: 'dashed' } } }],
+    dataZoom: [{ type: 'inside', xAxisIndex: [0,1] }, { type: 'slider', xAxisIndex: [0,1], height: 16, bottom: 0 }],
+    series: [
+      { name: '收盘价', type: 'line', data: close, showSymbol: false, lineStyle: { width: 1.5, color: '#1a237e' }, xAxisIndex: 0, yAxisIndex: 0 },
+      { name: 'ATR', type: 'line', data: atrResult.atr, showSymbol: false, lineStyle: { width: 1.5, color: '#ff6f00' }, xAxisIndex: 1, yAxisIndex: 1,
+        areaStyle: { color: 'rgba(255,111,0,0.08)' } },
+    ]
+  };
+}
+
+// ============================================================
+// 主刷新函数
+// ============================================================
+function refresh() {
+  const data = getFilteredData();
+  if (!data || data.length < 30) {
+    dataInfo.textContent = `${STOCKS_DATA[state.stock].name} — 数据不足 (需≥30条)`;
+    return;
+  }
+  dataInfo.textContent = `${STOCKS_DATA[state.stock].name} (${state.stock}) — ${data.length} 个交易日 | ${data[0].date} ~ ${data[data.length-1].date}`;
+  const result = computeAll(data);
+  renderChart(result);
+  if (chart) chart.resize();
+}
+
+// ============================================================
+// 事件绑定
+// ============================================================
+stockSelect.addEventListener('change', () => {
+  state.stock = stockSelect.value;
+  updateDateRange(state.dateRange);
+  refresh();
+});
+
+viewTabs.addEventListener('click', e => {
+  const btn = e.target.closest('button');
+  if (!btn) return;
+  viewTabs.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  state.view = btn.dataset.view;
+  renderParams();
+  refresh();
+});
+
+paramPanel.addEventListener('input', e => {
+  if (e.target.matches('input[type=range], input[type=number]')) {
+    const key = e.target.dataset.key;
+    const val = parseFloat(e.target.value);
+    if (key.startsWith('rsi_')) { const k = key.replace('rsi_',''); state.params.rsi[k] = val; }
+    else if (key.startsWith('macd_')) { const k = key.replace('macd_',''); state.params.macd[k] = val; }
+    else if (key.startsWith('bb_')) { const k = key.replace('bb_',''); state.params.bb[k] = val; }
+    else if (key.startsWith('atr_')) { const k = key.replace('atr_',''); state.params.atr[k] = val; }
+    else if (key === 'ma1' || key === 'ma2') {}
+    // Update slider display
+    const span = e.target.parentElement.querySelector('.range-val');
+    if (span) span.textContent = val;
+    refresh();
+  }
+});
+
+paramPanel.addEventListener('change', e => {
+  if (e.target.matches('select')) {
+    const key = e.target.dataset.key;
+    const val = e.target.value;
+    if (key === 'bb_ma') state.params.bb.maType = val;
+    else if (key === 'atr_smooth') state.params.atr.smooth = val;
+    refresh();
+  }
+});
+
+document.querySelectorAll('.quick-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.quick-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    state.dateRange = btn.dataset.range;
+    updateDateRange(state.dateRange);
+    refresh();
+  });
+});
+
+$('chkMA').addEventListener('change', () => { state.showMA = $('chkMA').checked; refresh(); });
+$('chkVol').addEventListener('change', () => { state.showVol = $('chkVol').checked; refresh(); });
+
+// ============================================================
+// 窗口缩放
+// ============================================================
+window.addEventListener('resize', () => { if (chart) chart.resize(); });
+
+// ============================================================
+// 启动
+// ============================================================
+stockSelect.value = state.stock;
+updateDateRange(state.dateRange);
+renderParams();
+refresh();
+</script>
+</body>
+</html>
