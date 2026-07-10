@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>海龟交易法则回测看板 — AI-Quant Lab</title>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+<script src="../js/indicators.js"></script>
+<script src="turtle.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;background:#f5f6fa;color:#2c3e50;padding:16px}
+.container{max-width:1400px;margin:0 auto;background:#fff;border-radius:12px;box-shadow:0 2px 12px rgba(0,0,0,.06);overflow:hidden}
+.header{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;background:linear-gradient(135deg,#1a237e,#283593);color:#fff}
+.header h1{font-size:17px;font-weight:600}
+.header .badge{font-size:11px;opacity:.7;background:rgba(255,255,255,.15);padding:2px 8px;border-radius:10px;margin-left:8px}
+.header .info{font-size:12px;opacity:.8}
+.toolbar{display:flex;align-items:center;gap:10px;padding:10px 20px;border-bottom:1px solid #e0e0e0;flex-wrap:wrap;background:#fafafa;font-size:13px}
+.toolbar select{padding:5px 10px;border-radius:6px;border:1px solid #d0d0d0;font-size:13px;background:#fff;min-width:170px}
+.param-group{display:flex;align-items:center;gap:6px}
+.param-group label{color:#78909c;font-size:12px;white-space:nowrap}
+.param-group input[type=number]{width:52px;padding:3px 5px;border-radius:4px;border:1px solid #d0d0d0;font-size:12px;text-align:center}
+.btn-run{padding:6px 18px;border-radius:6px;border:1px solid #5c6bc0;background:#e8eaf6;font-size:13px;font-weight:500;color:#1a237e;cursor:pointer}
+.btn-run:hover{background:#c5cae9}
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(135px,1fr));gap:8px;padding:12px 20px;background:#fafafa;border-bottom:1px solid #eee}
+.metric{border-radius:8px;padding:8px 12px;background:#fff;border:1px solid #eee}
+.metric .lbl{font-size:10px;color:#90a4ae;margin-bottom:1px}
+.metric .val{font-size:17px;font-weight:600}
+.metric .sub{font-size:10px;color:#90a4ae;margin-top:1px}
+.pos{color:#e53935!important}.neg{color:#43a047!important}
+.chart-area{padding:14px}
+.chart-box{border:1px solid #eee;border-radius:10px;margin-bottom:12px;overflow:hidden}
+.chart-box .title{font-size:13px;font-weight:500;padding:10px 14px 0;color:#37474f}
+.chart{width:100%;height:340px}
+.chart-sm{width:100%;height:200px}
+.table-wrap{overflow-x:auto;padding:0 14px 14px}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{background:#f5f7fa;padding:7px 8px;text-align:right;font-weight:500;color:#546e7a;border-bottom:2px solid #e0e0e0;white-space:nowrap}
+th:first-child{text-align:left}
+td{padding:5px 8px;text-align:right;border-bottom:1px solid #f0f0f0;white-space:nowrap}
+td:first-child{text-align:left;color:#78909c}
+tr:hover{background:#fafafa}
+.rule-card{margin:0 14px 12px;padding:10px 14px;background:#f5f7fa;border-radius:8px;border:1px solid #eee;font-size:12px;color:#546e7a;line-height:1.6}
+.rule-card strong{color:#37474f}
+.footer{display:flex;justify-content:space-between;padding:10px 20px;border-top:1px solid #eee;font-size:11px;color:#90a4ae}
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <div><h1>海龟交易法则回测 <span class="badge">手续费万三·滑点万一</span></h1></div>
+    <div class="info">初始资金 1,000,000 | 趋势跟踪经典策略</div>
+  </div>
+
+  <div class="toolbar">
+    <select id="stockSelect"></select>
+    <div class="param-group"><label>入市突破</label><input type="number" id="entryPeriod" value="20" min="5" max="120"></div>
+    <div class="param-group"><label>离市突破</label><input type="number" id="exitPeriod" value="10" min="3" max="60"></div>
+    <div class="param-group"><label>ATR周期</label><input type="number" id="atrPeriod" value="20" min="5" max="60"></div>
+    <button class="btn-run" id="runBtn">运行回测</button>
+  </div>
+
+  <div class="rule-card">
+    <strong>规则说明</strong>：
+    入市 — 价格突破 <span id="rEntry">20</span> 日高点做多 / 低点做空&nbsp;|&nbsp;
+    离市 — 反向突破 <span id="rExit">10</span> 日低点(多) / 高点(空)平仓&nbsp;|&nbsp;
+    止损 — 入场价 ± 2×ATR&nbsp;|&nbsp;
+    加仓 — 每涨 <strong>0.5×ATR</strong> 加 1 unit, 最多 4 units&nbsp;|&nbsp;
+    头寸 — 1 unit = 1% 账户 ÷ ATR
+  </div>
+
+  <div class="metrics" id="metricsBar">
+    <div class="metric"><div class="lbl">累计收益率</div><div class="val" id="mReturn">--</div><div class="sub" id="mBuyHold">基准: --</div></div>
+    <div class="metric"><div class="lbl">年化收益率</div><div class="val" id="mAnnual">--</div></div>
+    <div class="metric"><div class="lbl">最大回撤</div><div class="val" id="mDrawdown">--</div></div>
+    <div class="metric"><div class="lbl">交易次数</div><div class="val" id="mTrades">--</div></div>
+    <div class="metric"><div class="lbl">胜率</div><div class="val" id="mWinRate">--</div></div>
+    <div class="metric"><div class="lbl">Sharpe</div><div class="val" id="mSharpe">--</div></div>
+    <div class="metric"><div class="lbl">总手续费</div><div class="val" id="mFee">--</div></div>
+    <div class="metric"><div class="lbl">总滑点</div><div class="val" id="mSlippage">--</div></div>
+  </div>
+
+  <div class="chart-area">
+    <div class="chart-box">
+      <div class="title">价格走势与交易信号</div>
+      <div id="priceChart" class="chart"></div>
+    </div>
+    <div class="chart-box">
+      <div class="title">累计收益曲线</div>
+      <div id="equityChart" class="chart"></div>
+    </div>
+    <div class="chart-box">
+      <div class="title">策略 vs 买入持有</div>
+      <div id="compareChart" class="chart-sm"></div>
+    </div>
+  </div>
+
+  <div class="chart-box">
+    <div class="title" style="padding-bottom:8px">交易记录</div>
+    <div class="table-wrap">
+      <table><thead><tr><th>日期</th><th>方向</th><th>价格</th><th>数量</th><th>手续费</th><th>盈亏</th><th>盈亏%</th><th>剩余现金</th></tr></thead><tbody id="tradeBody"></tbody></table>
+    </div>
+  </div>
+
+  <div class="footer">
+    <span>海龟交易法则 (Richard Dennis, 1983) | 入市突破价 = N日最高/最低</span>
+    <span>AI-Quant Lab</span>
+  </div>
+</div>
+
+<script>
+const stockSelect = document.getElementById('stockSelect');
+const entryPeriod = document.getElementById('entryPeriod');
+const exitPeriod = document.getElementById('exitPeriod');
+const atrPeriod = document.getElementById('atrPeriod');
+const runBtn = document.getElementById('runBtn');
+
+Object.entries(STOCKS_DATA).forEach(([code, info]) => {
+  const opt = document.createElement('option');
+  opt.value = code; opt.textContent = `${info.name} (${code})`;
+  stockSelect.appendChild(opt);
+});
+stockSelect.value = '000725.SZ';
+
+const priceChart = echarts.init(document.getElementById('priceChart'));
+const equityChart = echarts.init(document.getElementById('equityChart'));
+const compareChart = echarts.init(document.getElementById('compareChart'));
+
+function $(id) { return document.getElementById(id); }
+function setMetric(id, val, cls) {
+  const el = $(id); el.textContent = val; el.className = 'val ' + (cls || '');
+}
+
+function run() {
+  const code = stockSelect.value;
+  const data = STOCKS_DATA[code].data;
+  const ep = parseInt(entryPeriod.value);
+  const xp = parseInt(exitPeriod.value);
+  const ap = parseInt(atrPeriod.value);
+
+  if (xp >= ep) { alert('离市突破周期必须小于入市周期'); return; }
+  if (!data || data.length < ep + 20) { alert('数据不足'); return; }
+
+  $( 'rEntry').textContent = ep;
+  $( 'rExit').textContent = xp;
+
+  const result = runTurtleBacktest(data, ep, xp, ap, 0.0003, 0.0001);
+  if (!result) { alert('回测失败'); return; }
+
+  const s = result.summary;
+  const rc = parseFloat(s.totalReturn) >= 0 ? 'pos' : 'neg';
+  const bc = parseFloat(s.buyHoldReturn) >= 0 ? 'pos' : 'neg';
+  setMetric('mReturn', (parseFloat(s.totalReturn) >= 0 ? '+' : '') + s.totalReturn + '%', rc);
+  $( 'mBuyHold').textContent = '买入持有: ' + (parseFloat(s.buyHoldReturn) >= 0 ? '+' : '') + s.buyHoldReturn + '%';
+  $( 'mBuyHold').className = 'sub ' + bc;
+  setMetric('mAnnual', (parseFloat(s.annualReturn) >= 0 ? '+' : '') + s.annualReturn + '%', parseFloat(s.annualReturn) >= 0 ? 'pos' : 'neg');
+  setMetric('mDrawdown', '-' + s.maxDrawdown + '%', 'neg');
+  setMetric('mTrades', s.tradeCount);
+  setMetric('mWinRate', s.winRate + '%', parseFloat(s.winRate) >= 40 ? 'pos' : 'neg');
+  setMetric('mSharpe', s.sharpe, parseFloat(s.sharpe) >= 1 ? 'pos' : 'neg');
+  setMetric('mFee', '¥' + s.totalCommission.toLocaleString());
+  setMetric('mSlippage', '¥' + s.totalSlippage.toLocaleString());
+
+  const dates = data.map(d => d.date);
+  const close = data.map(d => d.close);
+
+  // Price chart
+  const buyMarks = result.trades.filter(t => t.type.startsWith('开多')).map(t => [t.date, t.price]);
+  const sellMarks = result.trades.filter(t => t.type.startsWith('开空')).map(t => [t.date, t.price]);
+  const exitMarks = result.trades.filter(t => t.type.startsWith('平') || t.type.startsWith('止损') || t.type.startsWith('强平')).map(t => [t.date, t.price]);
+
+  priceChart.setOption({
+    tooltip: { trigger: 'axis', axisPointer: { type: 'cross' } },
+    legend: { data: ['收盘价','入市高点','入市低点','开多','开空','平仓'], top: 0, textStyle: { fontSize: 10 } },
+    grid: { left: '8%', right: '6%', top: '14%', bottom: '10%' },
+    xAxis: { type: 'category', data: dates, axisLabel: { rotate: 30, fontSize: 10, interval: Math.max(Math.floor(dates.length/15),1) } },
+    yAxis: { scale: true, splitLine: { lineStyle: { type: 'dashed' } } },
+    dataZoom: [{ type: 'inside' }, { type: 'slider', height: 14, bottom: 0 }],
+    series: [
+      { name: '收盘价', type: 'line', data: close, showSymbol: false, lineStyle: { width: 1.2, color: '#1a237e' } },
+      { name: '入市高点', type: 'line', data: result.extra.highest, showSymbol: false, lineStyle: { width: 0.8, color: '#e53935', type: 'dashed', opacity: .5 } },
+      { name: '入市低点', type: 'line', data: result.extra.lowest, showSymbol: false, lineStyle: { width: 0.8, color: '#43a047', type: 'dashed', opacity: .5 } },
+      { name: '开多', type: 'scatter', data: buyMarks, symbol: 'pin', symbolSize: 24, itemStyle: { color: '#e53935' } },
+      { name: '开空', type: 'scatter', data: sellMarks, symbol: 'pin', symbolSize: 24, itemStyle: { color: '#1565c0' } },
+      { name: '平仓', type: 'scatter', data: exitMarks, symbol: 'diamond', symbolSize: 18, itemStyle: { color: '#43a047' } },
+    ]
+  });
+
+  // Equity curve
+  equityChart.setOption({
+    tooltip: { trigger: 'axis', valueFormatter: v => '¥' + Math.round(v).toLocaleString() },
+    grid: { left: '8%', right: '6%', bottom: '10%' },
+    xAxis: { type: 'category', data: dates, axisLabel: { rotate: 30, fontSize: 10, interval: Math.max(Math.floor(dates.length/15),1) } },
+    yAxis: { type: 'value', axisLabel: { formatter: v => '¥' + (v/10000).toFixed(0) + '万' }, splitLine: { lineStyle: { type: 'dashed' } } },
+    dataZoom: [{ type: 'inside' }, { type: 'slider', height: 14, bottom: 0 }],
+    series: [{
+      name: '总资产', type: 'line', data: result.equity, showSymbol: false,
+      lineStyle: { width: 2, color: '#1a237e' },
+      areaStyle: { color: 'rgba(26,35,126,0.08)' },
+      markLine: { silent: true, data: [{ yAxis: 1000000, label: { formatter: '初始 ¥1,000,000', fontSize: 10 }, lineStyle: { color: '#90a4ae', type: 'dashed' } }] },
+    }]
+  });
+
+  // Compare
+  const bhEquity = close.map(c => 1000000 * c / close[0]);
+  compareChart.setOption({
+    tooltip: { trigger: 'axis', valueFormatter: v => '¥' + Math.round(v).toLocaleString() },
+    legend: { data: ['海龟策略','买入持有'], top: 0, textStyle: { fontSize: 10 } },
+    grid: { left: '8%', right: '6%', bottom: '12%' },
+    xAxis: { type: 'category', data: dates, axisLabel: { fontSize: 10, interval: Math.max(Math.floor(dates.length/15),1) } },
+    yAxis: { type: 'value', axisLabel: { formatter: v => '¥' + (v/10000).toFixed(0) + '万' }, splitLine: { lineStyle: { type: 'dashed' } } },
+    series: [
+      { name: '海龟策略', type: 'line', data: result.equity, showSymbol: false, lineStyle: { width: 2, color: '#1a237e' }, areaStyle: { color: 'rgba(26,35,126,0.06)' } },
+      { name: '买入持有', type: 'line', data: bhEquity, showSymbol: false, lineStyle: { width: 1.5, color: '#90a4ae', type: 'dashed' } },
+    ]
+  });
+
+  // Trade table
+  const tbody = document.getElementById('tradeBody');
+  tbody.innerHTML = '';
+  result.trades.forEach(t => {
+    const tr = document.createElement('tr');
+    const tc = t.type.includes('开多') || t.type.includes('加仓+') ? '#e53935' : t.type.includes('开空') || t.type.includes('加空') ? '#1565c0' : '#43a047';
+    tr.innerHTML = `<td>${t.date}</td><td style="color:${tc};font-weight:500">${t.type}</td><td>${typeof t.price === 'number' ? t.price.toFixed(2) : '-'}</td>
+      <td>${t.units || '-'}</td><td>${typeof t.fee === 'number' ? '¥'+t.fee.toFixed(2) : '-'}</td>
+      <td style="color:${t.profit !== '-' && t.profit > 0 ? '#e53935' : t.profit !== '-' ? '#43a047' : '#90a4ae'}">${t.profit !== '-' ? (t.profit >= 0 ? '+' : '') + '¥' + t.profit.toFixed(2) : '-'}</td>
+      <td style="color:${t.profitPct && t.profitPct > 0 ? '#e53935' : t.profitPct && t.profitPct < 0 ? '#43a047' : '#90a4ae'}">${t.profitPct ? (t.profitPct >= 0 ? '+' : '') + t.profitPct.toFixed(2) + '%' : '-'}</td>
+      <td>¥${Math.round(t.cash).toLocaleString()}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+runBtn.addEventListener('click', run);
+stockSelect.addEventListener('change', run);
+entryPeriod.addEventListener('change', run);
+exitPeriod.addEventListener('change', run);
+atrPeriod.addEventListener('change', run);
+window.addEventListener('resize', () => { priceChart.resize(); equityChart.resize(); compareChart.resize(); });
+
+stockSelect.value = '000725.SZ';
+run();
+</script>
+</body>
+</html>
