@@ -198,3 +198,42 @@ function computeSMA(data, period) {
   }
   return result;
 }
+
+// ============================================================
+// 股票数据 (预加载 7 只 A 股 / 港股, 供所有看板使用)
+// ============================================================
+const STOCKS_DATA = (function() {
+  function genPrice(base, days, volatility) {
+    const data = [];
+    let price = base;
+    let d = new Date('2025-07-03');
+    for (let i = 0; i < days; i++) {
+      d = new Date(d.getTime() + 86400000);
+      if (d.getDay() === 0 || d.getDay() === 6) continue;
+      const trend = Math.sin(i / days * Math.PI * 1.5) * base * 0.3;
+      const noise = (Math.random() - 0.5) * base * volatility;
+      const open = Math.round((price + noise) * 100) / 100;
+      const range = base * volatility * (0.5 + Math.random());
+      const high = Math.round((open + range * (0.6 + Math.random() * 0.4)) * 100) / 100;
+      const low = Math.round((open - range * (0.3 + Math.random() * 0.3)) * 100) / 100;
+      const close = Math.round((low + (high - low) * (0.2 + Math.random() * 0.6)) * 100) / 100;
+      const vol = Math.round((1000000 + Math.random() * 50000000) * (1 + range / base));
+      data.push({date: formatDate(d), open, high, low, close, vol});
+      price = close + trend * 0.01;
+    }
+    return data;
+  }
+  function formatDate(d) {
+    const y = d.getFullYear(), m = String(d.getMonth()+1).padStart(2,'0'), day = String(d.getDate()).padStart(2,'0');
+    return y+'-'+m+'-'+day;
+  }
+  return {
+    '688981.SH': { name:'中芯国际', market:'科创板', data: genPrice(88, 380, 0.035) },
+    '000725.SZ': { name:'京东方A', market:'深市', data: genPrice(4, 380, 0.04) },
+    '002594.SZ': { name:'比亚迪', market:'深市', data: genPrice(280, 380, 0.038) },
+    '600900.SH': { name:'长江电力', market:'沪市', data: genPrice(28, 380, 0.025) },
+    '600519.SH': { name:'贵州茅台', market:'沪市', data: genPrice(1500, 380, 0.03) },
+    '00700.HK': { name:'腾讯控股', market:'港股', data: genPrice(380, 380, 0.035) },
+    '00981.HK': { name:'中芯国际(港)', market:'港股', data: genPrice(45, 380, 0.045) },
+  };
+})();
